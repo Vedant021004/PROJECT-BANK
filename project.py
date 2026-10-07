@@ -1,78 +1,70 @@
-
-from abc import ABC, abstractmethod
 from datetime import datetime
 
 
-class Account(ABC):
+class Account:
 
-    def __init__(self, account_number, holder_name, pin, balance=0):
-        self._account_number = account_number
-        self._holder_name = holder_name
-        self._pin = pin
-        self._balance = balance
-        self._transactions = []
+    def __init__(self, account_number, name, pin, balance=0):
+        self.account_number = account_number
+        self.name = name
+        self.pin = pin
+        self.balance = balance
+        self.transactions = []
 
-    @property
-    def account_number(self):
-        return self._account_number
-
-    @property
-    def holder_name(self):
-        return self._holder_name
-
-    @property
-    def balance(self):
-        return self._balance
-
-    def verify_pin(self, pin):
-        return self._pin == pin
-
-    def change_pin(self, old_pin, new_pin):
-        if not self.verify_pin(old_pin):
-            raise ValueError("Incorrect current PIN.")
-
-        if not new_pin.isdigit() or len(new_pin) != 4:
-            raise ValueError("PIN must contain exactly 4 digits.")
-
-        self._pin = new_pin
-        return True
+    def check_pin(self, pin):
+        return self.pin == pin
 
     def deposit(self, amount):
 
         if amount <= 0:
-            raise ValueError("Deposit amount must be greater than zero.")
+            raise ValueError("Amount must be greater than zero.")
 
-        self._balance += amount
+        self.balance += amount
 
-        self._add_transaction(
-            "DEPOSIT",
-            amount
-        )
+        self.add_transaction("Deposit", amount)
 
-    @abstractmethod
     def withdraw(self, amount):
-        pass
 
-    def _add_transaction(self, transaction_type, amount):
+        if amount <= 0:
+            raise ValueError("Amount must be greater than zero.")
+
+        if amount > self.balance:
+            raise ValueError("Insufficient balance.")
+
+        self.balance -= amount
+
+        self.add_transaction("Withdrawal", amount)
+
+    def change_pin(self, old_pin, new_pin):
+
+        if old_pin != self.pin:
+            raise ValueError("Incorrect current PIN.")
+
+        if len(new_pin) != 4 or not new_pin.isdigit():
+            raise ValueError("PIN must contain exactly 4 digits.")
+
+        self.pin = new_pin
+
+    def add_transaction(self, transaction_type, amount):
 
         transaction = {
             "type": transaction_type,
             "amount": amount,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "balance": self._balance
+            "date": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+            "balance": self.balance
         }
 
-        self._transactions.append(transaction)
+        self.transactions.append(transaction)
 
-    def transaction_history(self):
+    def show_transactions(self):
 
-        if not self._transactions:
-            print("\nNo transactions found.")
+        if not self.transactions:
+            print("\nNo transactions available.")
             return
 
         print("\n========== TRANSACTION HISTORY ==========")
 
-        for transaction in self._transactions:
+        for transaction in self.transactions:
+
             print(
                 f"{transaction['date']} | "
                 f"{transaction['type']} | "
@@ -82,13 +74,12 @@ class Account(ABC):
 
         print("=========================================")
 
-    def display_account(self):
+    def show_details(self):
 
         print("\n========== ACCOUNT DETAILS ==========")
-        print(f"Account Holder : {self._holder_name}")
-        print(f"Account Number : {self._account_number}")
-        print(f"Account Type   : {self.__class__.__name__}")
-        print(f"Balance        : ₹{self._balance:.2f}")
+        print(f"Account Holder : {self.name}")
+        print(f"Account Number : {self.account_number}")
+        print(f"Balance        : ₹{self.balance:.2f}")
         print("=====================================")
 
 
@@ -96,126 +87,114 @@ class SavingsAccount(Account):
 
     def withdraw(self, amount):
 
-        if amount <= 0:
-            raise ValueError("Withdrawal amount must be greater than zero.")
+        if amount > self.balance:
+            raise ValueError("Savings account has insufficient balance.")
 
-        if amount > self._balance:
-            raise ValueError("Insufficient balance.")
-
-        self._balance -= amount
-
-        self._add_transaction(
-            "WITHDRAW",
-            amount
-        )
+        self.balance -= amount
+        self.add_transaction("Withdrawal", amount)
 
 
 class CurrentAccount(Account):
 
-    OVERDRAFT_LIMIT = 10000
+    def __init__(self, account_number, name, pin, balance=0):
+        super().__init__(
+            account_number,
+            name,
+            pin,
+            balance
+        )
+
+        self.overdraft_limit = 10000
 
     def withdraw(self, amount):
 
-        if amount <= 0:
-            raise ValueError("Withdrawal amount must be greater than zero.")
+        if amount > self.balance + self.overdraft_limit:
+            raise ValueError("Overdraft limit exceeded.")
 
-        if amount > self._balance + self.OVERDRAFT_LIMIT:
-            raise ValueError("Withdrawal exceeds overdraft limit.")
-
-        self._balance -= amount
-
-        self._add_transaction(
-            "WITHDRAW",
-            amount
-        )
+        self.balance -= amount
+        self.add_transaction("Withdrawal", amount)
 
 
 class Bank:
 
-    def __init__(self, bank_name):
-        self.bank_name = bank_name
-        self._accounts = {}
+    def __init__(self, name):
+        self.name = name
+        self.accounts = {}
 
     def create_account(
         self,
         account_type,
         account_number,
-        holder_name,
+        name,
         pin,
-        initial_balance=0
+        balance
     ):
 
-        if account_number in self._accounts:
+        if account_number in self.accounts:
             raise ValueError("Account already exists.")
 
-        if not pin.isdigit() or len(pin) != 4:
+        if len(pin) != 4 or not pin.isdigit():
             raise ValueError("PIN must contain exactly 4 digits.")
 
-        if initial_balance < 0:
-            raise ValueError("Initial balance cannot be negative.")
+        if balance < 0:
+            raise ValueError("Balance cannot be negative.")
 
         if account_type.lower() == "savings":
 
             account = SavingsAccount(
                 account_number,
-                holder_name,
+                name,
                 pin,
-                initial_balance
+                balance
             )
 
         elif account_type.lower() == "current":
 
             account = CurrentAccount(
                 account_number,
-                holder_name,
+                name,
                 pin,
-                initial_balance
+                balance
             )
 
         else:
             raise ValueError("Invalid account type.")
 
-        self._accounts[account_number] = account
+        self.accounts[account_number] = account
 
-        return account
+        print("\nAccount created successfully!")
 
-    def get_account(self, account_number):
+    def login(self, account_number, pin):
 
-        return self._accounts.get(account_number)
-
-    def authenticate(self, account_number, pin):
-
-        account = self.get_account(account_number)
+        account = self.accounts.get(account_number)
 
         if account is None:
             return None
 
-        if account.verify_pin(pin):
+        if account.check_pin(pin):
             return account
 
         return None
 
 
-class BankingApplication:
+class BankingSystem:
 
     def __init__(self, bank):
         self.bank = bank
-        self.current_account = None
 
-    def run(self):
+    def start(self):
 
         while True:
 
-            print("\n")
-            print("======================================")
-            print(f"       {self.bank.bank_name}")
-            print("======================================")
+            print("\n================================")
+            print(f"       {self.bank.name}")
+            print("================================")
             print("1. Create Account")
             print("2. Login")
             print("3. Exit")
-            print("======================================")
+            print("================================")
 
-            choice = input("Enter your choice: ")
+            choice = input("Enter choice: ")
 
             if choice == "1":
                 self.create_account()
@@ -224,7 +203,7 @@ class BankingApplication:
                 self.login()
 
             elif choice == "3":
-                print("\nThank you for banking with us!")
+                print("\nThank you for using our bank!")
                 break
 
             else:
@@ -234,14 +213,14 @@ class BankingApplication:
 
         print("\n========== CREATE ACCOUNT ==========")
 
-        name = input("Enter account holder name: ")
+        name = input("Enter name: ")
         account_number = input("Enter account number: ")
-        account_type = input("Account type (Savings/Current): ")
+        account_type = input("Enter account type (Savings/Current): ")
         pin = input("Create 4-digit PIN: ")
 
         try:
 
-            initial_balance = float(
+            balance = float(
                 input("Enter initial deposit: ₹")
             )
 
@@ -250,10 +229,8 @@ class BankingApplication:
                 account_number,
                 name,
                 pin,
-                initial_balance
+                balance
             )
-
-            print("\nAccount created successfully!")
 
         except ValueError as error:
 
@@ -263,10 +240,10 @@ class BankingApplication:
 
         print("\n========== LOGIN ==========")
 
-        account_number = input("Account Number: ")
+        account_number = input("Account number: ")
         pin = input("PIN: ")
 
-        account = self.bank.authenticate(
+        account = self.bank.login(
             account_number,
             pin
         )
@@ -276,41 +253,36 @@ class BankingApplication:
             print("\nInvalid account number or PIN.")
             return
 
-        self.current_account = account
+        print(f"\nWelcome, {account.name}!")
 
-        print(
-            f"\nWelcome, {account.holder_name}!"
-        )
+        self.account_menu(account)
 
-        self.account_menu()
-
-    def account_menu(self):
+    def account_menu(self, account):
 
         while True:
 
-            print("\n========== BANKING MENU ==========")
+            print("\n========== ACCOUNT MENU ==========")
             print("1. Account Details")
             print("2. Check Balance")
-            print("3. Deposit Money")
-            print("4. Withdraw Money")
+            print("3. Deposit")
+            print("4. Withdraw")
             print("5. Transaction History")
             print("6. Change PIN")
             print("7. Logout")
             print("==================================")
 
-            choice = input("Enter your choice: ")
+            choice = input("Enter choice: ")
 
             try:
 
                 if choice == "1":
 
-                    self.current_account.display_account()
+                    account.show_details()
 
                 elif choice == "2":
 
                     print(
-                        f"\nCurrent Balance: "
-                        f"₹{self.current_account.balance:.2f}"
+                        f"\nCurrent Balance: ₹{account.balance:.2f}"
                     )
 
                 elif choice == "3":
@@ -319,11 +291,9 @@ class BankingApplication:
                         input("Enter deposit amount: ₹")
                     )
 
-                    self.current_account.deposit(amount)
+                    account.deposit(amount)
 
-                    print(
-                        f"\n₹{amount:.2f} deposited successfully."
-                    )
+                    print("\nDeposit successful!")
 
                 elif choice == "4":
 
@@ -331,37 +301,29 @@ class BankingApplication:
                         input("Enter withdrawal amount: ₹")
                     )
 
-                    self.current_account.withdraw(amount)
+                    account.withdraw(amount)
 
-                    print(
-                        f"\n₹{amount:.2f} withdrawn successfully."
-                    )
+                    print("\nWithdrawal successful!")
 
                 elif choice == "5":
 
-                    self.current_account.transaction_history()
+                    account.show_transactions()
 
                 elif choice == "6":
 
-                    old_pin = input(
-                        "Enter current PIN: "
-                    )
+                    old_pin = input("Enter current PIN: ")
+                    new_pin = input("Enter new PIN: ")
 
-                    new_pin = input(
-                        "Enter new 4-digit PIN: "
-                    )
-
-                    self.current_account.change_pin(
+                    account.change_pin(
                         old_pin,
                         new_pin
                     )
 
-                    print("\nPIN changed successfully.")
+                    print("\nPIN changed successfully!")
 
                 elif choice == "7":
 
                     print("\nLogged out successfully.")
-                    self.current_account = None
                     break
 
                 else:
@@ -375,6 +337,6 @@ class BankingApplication:
 
 bank = Bank("SMART BANK")
 
-app = BankingApplication(bank)
+system = BankingSystem(bank)
 
-app.run()
+system.start()
