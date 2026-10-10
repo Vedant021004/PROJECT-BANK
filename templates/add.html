@@ -1,32 +1,55 @@
 {% extends "base.html" %}
-{% block title %}Add Batch — INVENTRCK{% endblock %}
+{% block title %}Add & Adjust Stock — Inventrack{% endblock %}
 
 {% block extra_css %}
 <style>
-
 /* ═══════════════════════════════════════════
-   PAGE LAYOUT
+   PAGE TOPBAR & TABS
 ═══════════════════════════════════════════ */
 .page-topbar {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; flex-wrap: wrap;
-    gap: 14px; margin-bottom: 28px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px; margin-bottom: 24px;
 }
 .ph-titles h1 {
-    font-size: 22px; font-weight: 800;
-    letter-spacing: -.4px; margin-bottom: 4px;
+    font-size: 24px; font-weight: 800;
+    letter-spacing: -0.5px; color: #ffffff;
+    display: flex; align-items: center; gap: 10px;
 }
-.ph-titles p { font-size: 13.5px; color: var(--txt2); }
-.ph-actions  { display: flex; gap: 10px; flex-wrap: wrap; }
+.ph-titles p { font-size: 13.5px; color: var(--txt2); margin-top: 4px; }
+
+/* Segmented mode switcher */
+.mode-tabs {
+    display: inline-flex;
+    background: var(--s2);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    padding: 4px;
+    margin-bottom: 24px;
+}
+.tab-btn {
+    padding: 8px 18px; border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 700;
+    border: none; background: transparent; color: var(--txt2);
+    cursor: pointer; transition: all 0.15s ease;
+    display: flex; align-items: center; gap: 8px;
+}
+.tab-btn.active {
+    background: var(--a);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+.tab-btn:hover:not(.active) {
+    color: #ffffff;
+    background: var(--s3);
+}
 
 /* ═══════════════════════════════════════════
-   FORM CARD
+   FORM LAYOUT
 ═══════════════════════════════════════════ */
 .form-layout {
     display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 24px;
-    align-items: start;
+    grid-template-columns: 1fr 360px;
+    gap: 24px; align-items: start;
 }
 
 .form-card {
@@ -34,231 +57,195 @@
     border: 1px solid var(--bdr);
     border-radius: var(--r);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .form-card-header {
-    padding: 20px 26px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--bdr);
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: center; gap: 12px;
     background: var(--s2);
 }
-
 .form-card-icon {
-    width: 40px; height: 40px;
-    background: var(--grad);
-    border-radius: 10px;
+    width: 38px; height: 38px;
+    background: var(--a-soft);
+    border: 1px solid var(--a-border);
+    border-radius: 9px;
     display: grid; place-items: center;
-    font-size: 16px; color: #fff;
+    font-size: 15px; color: var(--a);
     flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(0,119,182,0.35);
 }
+.form-card-title { font-size: 15px; font-weight: 700; color: #ffffff; }
+.form-card-sub   { font-size: 12.5px; color: var(--txt3); margin-top: 2px; }
 
-.form-card-title  { font-size: 15px; font-weight: 700; }
-.form-card-sub    { font-size: 12.5px; color: var(--txt2); margin-top: 2px; }
+.form-body { padding: 26px 24px; }
 
-.form-body { padding: 28px 26px; }
-
-/* ═══════════════════════════════════════════
-   FORM FIELDS
-═══════════════════════════════════════════ */
+/* Form Fields */
 .field { margin-bottom: 20px; }
-.field:last-of-type { margin-bottom: 0; }
-
 .field label {
     display: flex; align-items: center; gap: 7px;
-    font-size: 12.5px; font-weight: 700;
-    color: var(--txt2); letter-spacing: .4px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
+    font-size: 12px; font-weight: 700;
+    color: var(--txt2); letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 8px;
 }
 .field label i { font-size: 11px; color: var(--txt3); }
-
 .field-hint {
     font-size: 12px; color: var(--txt3);
-    margin-bottom: 8px; margin-top: -4px;
-    font-weight: 400; text-transform: none; letter-spacing: 0;
+    margin-top: 6px; line-height: 1.4;
 }
 
 .input-wrap { position: relative; }
-
 .input-icon {
     position: absolute; left: 13px; top: 50%;
     transform: translateY(-50%);
-    color: var(--txt3); font-size: 14px;
-    pointer-events: none;
-    transition: color .18s;
+    color: var(--txt3); font-size: 13px; pointer-events: none;
+    transition: color 0.15s;
 }
 .input-wrap:focus-within .input-icon { color: var(--a); }
 
-.field input {
+.field input, .field select {
     width: 100%;
     background: var(--s2);
     border: 1px solid var(--bdr);
-    border-radius: 9px;
-    padding: 11px 14px 11px 40px;
-    font-size: 14px; font-weight: 500;
-    font-family: 'Inter', sans-serif;
-    color: var(--txt);
-    transition: all .18s;
-    outline: none;
-    -webkit-appearance: none;
+    border-radius: var(--r-sm);
+    padding: 10px 14px 10px 38px;
+    font-size: 13.5px; font-weight: 500;
+    font-family: inherit; color: var(--txt);
+    outline: none; transition: all 0.15s ease;
 }
-.field input::placeholder { color: var(--txt3); }
-.field input:focus {
+.field select {
+    cursor: pointer;
+    padding-left: 38px;
+}
+.field input:focus, .field select:focus {
     border-color: var(--a);
-    background: rgba(0,200,224,0.03);
-    box-shadow: 0 0 0 3px rgba(0,200,224,0.08);
+    box-shadow: 0 0 0 2px var(--a-soft);
 }
-.field input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.5) sepia(1) saturate(3) hue-rotate(160deg);
-    cursor: pointer; opacity: 0.7;
-}
-.field input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
-/* Counter UI for quantity */
+/* Stepper for Quantity */
 .qty-wrap {
-    display: flex; align-items: center; gap: 0;
+    display: flex; align-items: center;
 }
 .qty-btn {
-    width: 42px; height: 44px;
-    background: var(--s2);
-    border: 1px solid var(--bdr);
-    color: var(--txt2); font-size: 18px;
-    cursor: pointer; font-family: inherit;
-    transition: all .18s;
-    display: grid; place-items: center;
-    line-height: 1;
-    flex-shrink: 0;
+    width: 42px; height: 42px;
+    background: var(--s2); border: 1px solid var(--bdr);
+    color: var(--txt2); font-size: 18px; font-weight: 700;
+    cursor: pointer; display: grid; place-items: center;
+    transition: all 0.12s ease;
 }
-.qty-btn:first-child { border-radius: 9px 0 0 9px; border-right: none; }
-.qty-btn:last-child  { border-radius: 0 9px 9px 0; border-left: none; }
-.qty-btn:hover { background: var(--glow); color: var(--a); }
+.qty-btn:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); border-right: none; }
+.qty-btn:last-child  { border-radius: 0 var(--r-sm) var(--r-sm) 0; border-left: none; }
+.qty-btn:hover { background: var(--a); color: #ffffff; }
 
-#quantity {
+.qty-input {
     border-radius: 0 !important;
-    border-left: none !important; border-right: none !important;
-    text-align: center;
-    padding-left: 14px !important;   /* override icon padding */
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    letter-spacing: .5px;
+    text-align: center; padding-left: 14px !important;
+    font-weight: 700 !important; font-size: 15px !important;
 }
 
-/* Divider */
-.field-divider {
-    border: none;
-    border-top: 1px solid var(--bdr);
-    margin: 24px 0;
+/* Action toggle buttons: Increase vs Decrease */
+.action-toggle {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
 }
+.toggle-card {
+    border: 1px solid var(--bdr);
+    background: var(--s2);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s ease;
+}
+.toggle-card input[type="radio"] {
+    display: none;
+}
+.toggle-card.selected-inc {
+    border-color: var(--ok);
+    background: var(--ok-soft);
+}
+.toggle-card.selected-dec {
+    border-color: var(--crit);
+    background: var(--crit-soft);
+}
+.toggle-card i { font-size: 16px; }
+.toggle-card.selected-inc i { color: var(--ok); }
+.toggle-card.selected-dec i { color: var(--crit); }
+.toggle-title { font-size: 13px; font-weight: 700; color: #ffffff; }
+.toggle-sub   { font-size: 11px; color: var(--txt3); }
 
-/* Submit row */
+/* Form action footer */
 .form-actions {
-    display: flex; align-items: center;
-    gap: 12px; margin-top: 28px;
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 12px; margin-top: 26px;
 }
-
-.btn-submit {
-    flex: 1; min-width: 160px;
-    padding: 12px 24px;
-    border-radius: 9px;
-    font-size: 14.5px; font-weight: 700;
-    font-family: 'Inter', sans-serif;
-    background: var(--grad); color: #fff;
-    border: none; cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,119,182,0.35);
-    transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 9px;
-}
-.btn-submit:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(0,119,182,0.5);
-}
-.btn-submit:active { transform: translateY(0); }
 
 /* ═══════════════════════════════════════════
-   SIDEBAR INFO CARD
+   SIDEBAR PRODUCT LIST
 ═══════════════════════════════════════════ */
 .info-card {
     background: var(--s1);
     border: 1px solid var(--bdr);
     border-radius: var(--r);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
-
 .info-card-header {
     padding: 16px 20px;
     border-bottom: 1px solid var(--bdr);
-    font-size: 13px; font-weight: 700;
-    display: flex; align-items: center; gap: 9px;
-    color: var(--txt2);
-    background: var(--s2);
-    text-transform: uppercase;
-    letter-spacing: .8px;
+    font-size: 12.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--s2); color: var(--txt2);
 }
-.info-card-header i { color: var(--a); font-size: 12px; }
-
 .info-body { padding: 18px 20px; }
 
-.info-item {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--bdr);
+.prod-list {
+    display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto;
 }
-.info-item:last-child { border-bottom: none; padding-bottom: 0; }
-
-.info-dot {
-    width: 28px; height: 28px;
-    border-radius: 7px;
-    display: grid; place-items: center;
-    font-size: 12px; flex-shrink: 0; margin-top: 1px;
+.prod-item {
+    background: var(--s2);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: border-color 0.15s ease;
 }
-.id-blue  { background: rgba(0,119,182,0.14); color: var(--a2); }
-.id-cyan  { background: rgba(0,200,224,0.10); color: var(--a); }
-.id-green { background: rgba(16,217,160,0.10); color: var(--ok); }
-.id-warn  { background: rgba(240,180,41,0.10); color: var(--warn); }
-
-.info-text { font-size: 13px; line-height: 1.6; }
-.info-text strong { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 1px; }
-.info-text span   { color: var(--txt2); font-size: 12px; }
-
-/* FIFO notice */
-.fifo-notice {
-    margin-top: 16px;
-    background: rgba(0,200,224,0.06);
-    border: 1px solid rgba(0,200,224,0.14);
-    border-radius: 9px;
-    padding: 13px 15px;
-    display: flex; gap: 11px; align-items: flex-start;
+.prod-item:hover { border-color: var(--bdr2); }
+.prod-item-left { min-width: 0; }
+.prod-name-lbl {
+    font-size: 13px; font-weight: 700; color: #ffffff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.fifo-notice i { color: var(--a); font-size: 14px; margin-top: 1px; flex-shrink: 0; }
-.fifo-notice p { font-size: 12.5px; line-height: 1.6; color: var(--txt2); }
-.fifo-notice strong { color: var(--txt); }
+.prod-stock-lbl {
+    font-size: 11.5px; color: var(--txt3); margin-top: 2px;
+}
+.prod-quick-btn {
+    background: var(--a-soft);
+    border: 1px solid var(--a-border);
+    color: var(--a);
+    font-size: 12px; font-weight: 700;
+    padding: 5px 10px; border-radius: var(--r-sm);
+    cursor: pointer; transition: all 0.12s ease;
+}
+.prod-quick-btn:hover {
+    background: var(--a); color: #ffffff;
+}
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
 @media (max-width: 960px) {
     .form-layout { grid-template-columns: 1fr; }
-}
-@media (max-width: 480px) {
-    .form-body { padding: 20px 16px; }
-    .form-card-header { padding: 16px; }
 }
 </style>
 {% endblock %}
 
-
 {% block content %}
 
-{# ── Page header ────────────────────────────────────── #}
+{# ── Topbar ── #}
 <div class="page-topbar">
     <div class="ph-titles">
         <h1>
-            <i class="fas fa-cube" style="color:var(--a);margin-right:10px;font-size:19px"></i>
-            Add Batch
+            <i class="fas fa-boxes-stacked" style="color:var(--a)"></i>
+            Inventory Stock Management
         </h1>
-        <p>Register a new product batch with expiry information</p>
+        <p>Increase or decrease quantity of existing products, or register a new batch</p>
     </div>
     <div class="ph-actions">
         <a href="{{ url_for('home') }}" class="btn btn-ghost">
@@ -267,22 +254,159 @@
     </div>
 </div>
 
-{# ── Two-column layout ──────────────────────────────── #}
+{# ── Mode Switcher Tabs ── #}
+<div class="mode-tabs">
+    <button type="button" class="tab-btn active" id="tab-existing-btn" onclick="switchTab('existing')">
+        <i class="fas fa-sliders"></i> Adjust Existing Product (+ / &minus;)
+    </button>
+    <button type="button" class="tab-btn" id="tab-new-btn" onclick="switchTab('new')">
+        <i class="fas fa-plus-circle"></i> Register New Batch / Product
+    </button>
+</div>
+
+{# ── Main Layout ── #}
 <div class="form-layout">
 
-    {# ── Main form card ── #}
-    <div class="form-card">
+    {# ── TAB 1: Adjust Existing Product Stock ── #}
+    <div class="form-card" id="card-existing-product">
         <div class="form-card-header">
-            <div class="form-card-icon"><i class="fas fa-cube"></i></div>
+            <div class="form-card-icon"><i class="fas fa-sliders"></i></div>
             <div>
-                <div class="form-card-title">Batch Details</div>
-                <div class="form-card-sub">All fields are required</div>
+                <div class="form-card-title">Adjust Existing Product Stock</div>
+                <div class="form-card-sub">Quickly increase (add) or decrease (deduct) units for products you already carry</div>
+            </div>
+        </div>
+
+        <div class="form-body">
+            {% if user_products and user_products | length > 0 %}
+            <form method="POST" action="{{ url_for('adjust_product_route') }}">
+                <input type="hidden" name="redirect_to" value="add_batch">
+
+                <!-- 1. Select Existing Product -->
+                <div class="field">
+                    <label for="adj_product_name">
+                        <i class="fas fa-tag"></i> Select Product
+                    </label>
+                    <div class="input-wrap">
+                        <i class="fas fa-tag input-icon"></i>
+                        <select id="adj_product_name" name="product_name" required onchange="handleProductChange(this.value)">
+                            {% for p in user_products %}
+                                <option value="{{ p.product_name }}" data-qty="{{ p.total_quantity }}" data-price="{{ p.unit_price }}">
+                                    {{ p.product_name }} &mdash; Current Stock: {{ p.total_quantity }} units (₹{{ "%.2f"|format(p.unit_price) }}/unit)
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field-hint">Choose which existing product you want to modify</div>
+                </div>
+
+                <!-- 2. Action Type (Increase, Decrease, or Price Only) -->
+                <label style="display:block;font-size:12px;font-weight:700;color:var(--txt2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px">
+                    <i class="fas fa-arrows-up-down" style="font-size:11px;color:var(--txt3)"></i> Operation Mode
+                </label>
+                <div class="action-toggle" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <label class="toggle-card selected-inc" id="label-inc" onclick="selectAction('increase')">
+                        <input type="radio" name="action_type" value="increase" id="action-inc" checked>
+                        <i class="fas fa-circle-plus"></i>
+                        <div>
+                            <div class="toggle-title">+ Add Stock</div>
+                            <div class="toggle-sub">Receive Units</div>
+                        </div>
+                    </label>
+                    <label class="toggle-card" id="label-dec" onclick="selectAction('decrease')">
+                        <input type="radio" name="action_type" value="decrease" id="action-dec">
+                        <i class="fas fa-circle-minus"></i>
+                        <div>
+                            <div class="toggle-title">&minus; Deduct Stock</div>
+                            <div class="toggle-sub">Adjust / Damage</div>
+                        </div>
+                    </label>
+                    <label class="toggle-card" id="label-price" onclick="selectAction('price_only')">
+                        <input type="radio" name="action_type" value="price_only" id="action-price">
+                        <i class="fas fa-tags" style="color:var(--a)"></i>
+                        <div>
+                            <div class="toggle-title">Update Price</div>
+                            <div class="toggle-sub">Price Change Only</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- 3. Quantity & Price Grid -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="field" id="wrap-adj-quantity">
+                        <label for="adj_quantity">
+                            <i class="fas fa-boxes-stacked"></i> Quantity Units
+                        </label>
+                        <div class="qty-wrap">
+                            <button type="button" class="qty-btn" onclick="adjustAdjQty(-1)">&minus;</button>
+                            <input
+                                type="number"
+                                id="adj_quantity"
+                                name="quantity"
+                                class="qty-input"
+                                value="5"
+                                min="1"
+                                placeholder="Units"
+                            >
+                            <button type="button" class="qty-btn" onclick="adjustAdjQty(1)">&plus;</button>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="adj_unit_price">
+                            <i class="fas fa-indian-rupee-sign"></i> Unit Price (₹)
+                        </label>
+                        <div class="input-wrap">
+                            <i class="fas fa-indian-rupee-sign input-icon"></i>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                id="adj_unit_price"
+                                name="unit_price"
+                                placeholder="0.00"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-hint" id="adj-hint" style="margin-top:-6px;margin-bottom:18px">
+                    Will add 5 units to the current stock. You can also update the unit price above.
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-prim" id="adj-submit-btn" style="flex:1">
+                        <i class="fas fa-check"></i> Update Product Stock &amp; Price
+                    </button>
+                    <a href="{{ url_for('home') }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+            {% else %}
+            <div style="text-align:center;padding:32px 16px;color:var(--txt3)">
+                <i class="fas fa-box-open" style="font-size:32px;margin-bottom:10px;opacity:0.6"></i>
+                <h4 style="color:#ffffff;margin-bottom:6px">No products currently in stock</h4>
+                <p style="font-size:13px;margin-bottom:18px">Use the "Register New Batch / Product" tab to add your first product.</p>
+                <button type="button" class="btn btn-prim" onclick="switchTab('new')">
+                    <i class="fas fa-plus"></i> Register First Batch
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── TAB 2: Register New Batch / Product ── #}
+    <div class="form-card" id="card-new-batch" style="display:none">
+        <div class="form-card-header">
+            <div class="form-card-icon"><i class="fas fa-plus-circle"></i></div>
+            <div>
+                <div class="form-card-title">Register New Batch or Product</div>
+                <div class="form-card-sub">Create a new batch with unique ID, expiry date, and unit pricing</div>
             </div>
         </div>
 
         <div class="form-body">
             <form method="POST" action="{{ url_for('add_batchs') }}" id="add-form">
-
+                <!-- Product Name with Datalist for autocomplete -->
                 <div class="field">
                     <label for="product_name">
                         <i class="fas fa-tag"></i> Product Name
@@ -296,15 +420,22 @@
                             placeholder="e.g. PARACETAMOL 500MG"
                             autocomplete="off"
                             required
+                            list="existing-prod-list"
                             oninput="this.value = this.value.toUpperCase()"
                         >
+                        <datalist id="existing-prod-list">
+                            {% for p in user_products %}
+                                <option value="{{ p.product_name }}"></option>
+                            {% endfor %}
+                        </datalist>
                     </div>
-                    <div class="field-hint">Will be stored in uppercase automatically</div>
+                    <div class="field-hint">Type or select an existing product name to match</div>
                 </div>
 
+                <!-- Batch Number -->
                 <div class="field">
                     <label for="batch_no">
-                        <i class="fas fa-barcode"></i> Batch Number
+                        <i class="fas fa-barcode"></i> Batch Number / Lot ID
                     </label>
                     <div class="input-wrap">
                         <i class="fas fa-barcode input-icon"></i>
@@ -312,36 +443,58 @@
                             type="text"
                             id="batch_no"
                             name="batch_no"
-                            placeholder="e.g. BT-2026-0041"
+                            placeholder="e.g. BATCH-2026-01"
                             autocomplete="off"
                             required
                         >
                     </div>
-                    <div class="field-hint">Must be unique across all batches</div>
+                    <div class="field-hint">If this batch already exists, units will be safely merged</div>
                 </div>
 
-                <hr class="field-divider">
+                <!-- Quantity & Price Grid -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="field">
+                        <label for="quantity">
+                            <i class="fas fa-boxes-stacked"></i> Quantity
+                        </label>
+                        <div class="qty-wrap">
+                            <button type="button" class="qty-btn" onclick="adjustNewQty(-1)">&minus;</button>
+                            <input
+                                type="number"
+                                id="quantity"
+                                name="quantity"
+                                class="qty-input"
+                                value="10"
+                                min="1"
+                                placeholder="Units"
+                                required
+                            >
+                            <button type="button" class="qty-btn" onclick="adjustNewQty(1)">&plus;</button>
+                        </div>
+                    </div>
 
-                <div class="field">
-                    <label for="quantity">
-                        <i class="fas fa-boxes-stacked"></i> Quantity
-                    </label>
-                    <div class="qty-wrap">
-                        <button type="button" class="qty-btn" onclick="adjustQty(-1)">−</button>
-                        <input
-                            type="number"
-                            id="quantity"
-                            name="quantity"
-                            value="1"
-                            min="1"
-                            placeholder="Units"
-                            required
-                        >
-                        <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
+                    <div class="field">
+                        <label for="unit_price">
+                            <i class="fas fa-indian-rupee-sign"></i> Unit Price (₹)
+                        </label>
+                        <div class="input-wrap">
+                            <i class="fas fa-indian-rupee-sign input-icon"></i>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                id="unit_price"
+                                name="unit_price"
+                                placeholder="0.00"
+                                value="0.00"
+                                required
+                            >
+                        </div>
                     </div>
                 </div>
 
-                <div class="field" style="margin-top:20px">
+                <!-- Expiry Date -->
+                <div class="field">
                     <label for="expiry_date">
                         <i class="fas fa-calendar-xmark"></i> Expiry Date
                     </label>
@@ -357,92 +510,150 @@
                 </div>
 
                 <div class="form-actions">
-                    <a href="{{ url_for('home') }}" class="btn btn-ghost">
-                        <i class="fas fa-xmark"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-plus"></i> Add Batch to Inventory
+                    <button type="submit" class="btn btn-prim" style="flex:1">
+                        <i class="fas fa-plus"></i> Save Batch to Inventory
                     </button>
+                    <a href="{{ url_for('home') }}" class="btn btn-ghost">Cancel</a>
                 </div>
-
             </form>
         </div>
     </div>
 
-    {# ── Sidebar info card ── #}
+    {# ── Sidebar: Existing Products Quick Overview ── #}
     <div class="info-card">
         <div class="info-card-header">
-            <i class="fas fa-circle-info"></i> How it works
+            <span><i class="fas fa-clipboard-list" style="color:var(--a);margin-right:6px"></i> Your Products</span>
+            <span style="font-size:11px;color:var(--txt3)">{{ user_products | length }} registered</span>
         </div>
         <div class="info-body">
-
-            <div class="info-item">
-                <div class="info-dot id-blue"><i class="fas fa-tag"></i></div>
-                <div class="info-text">
-                    <strong>Product Name</strong>
-                    <span>Use a consistent name across all batches of the same product so the system can track them together.</span>
+            {% if user_products and user_products | length > 0 %}
+            <div class="prod-list">
+                {% for p in user_products %}
+                <div class="prod-item">
+                    <div class="prod-item-left">
+                        <div class="prod-name-lbl">{{ p.product_name }}</div>
+                        <div class="prod-stock-lbl">
+                            <strong style="color:#ffffff">{{ p.total_quantity }}</strong> units &middot; ₹{{ "%.2f"|format(p.unit_price) }}
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="prod-quick-btn"
+                        onclick="pickProduct('{{ p.product_name }}')"
+                        title="Select for adjustment"
+                    >
+                        Adjust &rarr;
+                    </button>
                 </div>
+                {% endfor %}
             </div>
-
-            <div class="info-item">
-                <div class="info-dot id-cyan"><i class="fas fa-barcode"></i></div>
-                <div class="info-text">
-                    <strong>Batch Number</strong>
-                    <span>Each batch must have a unique identifier. Duplicate batch numbers are rejected automatically.</span>
-                </div>
+            {% else %}
+            <div style="font-size:12.5px;color:var(--txt3);line-height:1.6">
+                No products tracked yet. Register your first product batch to view it here.
             </div>
-
-            <div class="info-item">
-                <div class="info-dot id-green"><i class="fas fa-boxes-stacked"></i></div>
-                <div class="info-text">
-                    <strong>Quantity</strong>
-                    <span>Enter the total number of units in this batch. You can use the + / − buttons or type directly.</span>
-                </div>
-            </div>
-
-            <div class="info-item">
-                <div class="info-dot id-warn"><i class="fas fa-calendar-xmark"></i></div>
-                <div class="info-text">
-                    <strong>Expiry Date</strong>
-                    <span>Batches expiring within 30 days will trigger alerts on the dashboard. Within 10 days shows as critical.</span>
-                </div>
-            </div>
-
-            <div class="fifo-notice">
-                <i class="fas fa-shuffle"></i>
-                <p><strong>FIFO dispatch:</strong> when you sell a product, the system automatically picks the batch with the <strong>earliest expiry date</strong> first to minimise waste.</p>
-            </div>
-
+            {% endif %}
         </div>
     </div>
 
-</div><!-- /.form-layout -->
+</div>
 
 {% endblock %}
 
-
 {% block extra_js %}
 <script>
-function adjustQty(delta) {
-    const inp = document.getElementById('quantity');
-    const current = parseInt(inp.value) || 1;
-    const next = Math.max(1, current + delta);
-    inp.value = next;
+function switchTab(mode) {
+    const cardExisting = document.getElementById('card-existing-product');
+    const cardNew = document.getElementById('card-new-batch');
+    const btnExisting = document.getElementById('tab-existing-btn');
+    const btnNew = document.getElementById('tab-new-btn');
+
+    if (mode === 'existing') {
+        cardExisting.style.display = 'block';
+        cardNew.style.display = 'none';
+        btnExisting.classList.add('active');
+        btnNew.classList.remove('active');
+    } else {
+        cardExisting.style.display = 'none';
+        cardNew.style.display = 'block';
+        btnNew.classList.add('active');
+        btnExisting.classList.remove('active');
+    }
 }
 
-/* Prevent accidentally submitting with quantity 0 or negative */
-document.getElementById('add-form').addEventListener('submit', function(e) {
-    const qty = parseInt(document.getElementById('quantity').value);
-    if (!qty || qty < 1) {
-        e.preventDefault();
-        document.getElementById('quantity').focus();
-        document.getElementById('quantity').style.borderColor = 'var(--crit)';
-        document.getElementById('quantity').style.boxShadow  = '0 0 0 3px rgba(249,96,96,0.12)';
-    }
-});
+function selectAction(type) {
+    const labelInc = document.getElementById('label-inc');
+    const labelDec = document.getElementById('label-dec');
+    const labelPrice = document.getElementById('label-price');
+    const hint = document.getElementById('adj-hint');
+    const btn = document.getElementById('adj-submit-btn');
+    const qtyWrap = document.getElementById('wrap-adj-quantity');
+    const qty = document.getElementById('adj_quantity').value;
 
-/* Set today as min date so past dates are still allowed (historical stock) */
-/* Uncomment the line below to restrict to future dates only */
-// document.getElementById('expiry_date').min = new Date().toISOString().split('T')[0];
+    labelInc.className = 'toggle-card';
+    labelDec.className = 'toggle-card';
+    labelPrice.className = 'toggle-card';
+
+    if (type === 'increase') {
+        document.getElementById('action-inc').checked = true;
+        labelInc.className = 'toggle-card selected-inc';
+        qtyWrap.style.display = 'block';
+        hint.textContent = `Will add ${qty} units to current stock and update price if entered.`;
+        btn.innerHTML = '<i class="fas fa-check"></i> Add Stock Units &amp; Save Price';
+    } else if (type === 'decrease') {
+        document.getElementById('action-dec').checked = true;
+        labelDec.className = 'toggle-card selected-dec';
+        qtyWrap.style.display = 'block';
+        hint.textContent = `Will deduct ${qty} units from stock using FEFO.`;
+        btn.innerHTML = '<i class="fas fa-check"></i> Deduct Stock Units';
+    } else if (type === 'price_only') {
+        document.getElementById('action-price').checked = true;
+        labelPrice.className = 'toggle-card selected-inc';
+        qtyWrap.style.display = 'none';
+        hint.textContent = 'Will update the unit price for this product without modifying stock quantities.';
+        btn.innerHTML = '<i class="fas fa-tags"></i> Save New Price Only';
+    }
+}
+
+function handleProductChange() {
+    const sel = document.getElementById('adj_product_name');
+    if (!sel) return;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt) {
+        const pr = opt.getAttribute('data-price') || '0.00';
+        const priceInp = document.getElementById('adj_unit_price');
+        if (priceInp) priceInp.value = parseFloat(pr).toFixed(2);
+    }
+}
+
+function adjustAdjQty(delta) {
+    const inp = document.getElementById('adj_quantity');
+    const cur = parseInt(inp.value) || 1;
+    const next = Math.max(1, cur + delta);
+    inp.value = next;
+    const isInc = document.getElementById('action-inc').checked;
+    const isDec = document.getElementById('action-dec').checked;
+    if (isInc) selectAction('increase');
+    else if (isDec) selectAction('decrease');
+    else selectAction('price_only');
+}
+
+function adjustNewQty(delta) {
+    const inp = document.getElementById('quantity');
+    const cur = parseInt(inp.value) || 1;
+    inp.value = Math.max(1, cur + delta);
+}
+
+function pickProduct(pname) {
+    switchTab('existing');
+    const sel = document.getElementById('adj_product_name');
+    if (sel) {
+        sel.value = pname;
+        handleProductChange();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    handleProductChange();
+});
 </script>
 {% endblock %}

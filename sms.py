@@ -14,6 +14,9 @@ def send_registration_alert(name, user_email ):
     sender_email = os.environ.get("SMTP_EMAIL")
     sender_password = os.environ.get("SMTP_PASSWORD")  # Generated via Google Account security
      
+    if not sender_email or not sender_password:
+        print(f"[LOCAL DEV] Registration alert for {name} ({user_email}) recorded.")
+        return True
      
     message = MIMEMultipart()
     message["From"] = sender_email
@@ -38,11 +41,11 @@ def send_registration_alert(name, user_email ):
         
         server.sendmail(sender_email, user_email, message.as_string())
         server.quit()
-        print(f"📬 Registration alert successfully routed to {user_email}")
+        print(f"[Alert] Registration alert successfully routed to {user_email}")
         return True
         
     except Exception as e:
-        print(f"❌ Email notification engine failed: {e}")
+        print(f"[Warning] Email notification engine failed: {e}")
         return False
 
 if __name__ == "__main__":

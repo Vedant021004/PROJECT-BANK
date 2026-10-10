@@ -1,387 +1,646 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — INVENTRACK{% endblock %}
+{% block title %}Dashboard — Inventrack{% endblock %}
 
 {% block extra_css %}
 <style>
+/* ═══════════════════════════════════════════
+   PAGE TOPBAR
+═══════════════════════════════════════════ */
+.page-topbar {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
+}
+.ph-titles h1 {
+    font-size: 24px; font-weight: 800;
+    letter-spacing: -0.5px; color: #ffffff;
+    display: flex; align-items: center; gap: 10px;
+}
+.ph-titles p {
+    font-size: 13.5px; color: var(--txt2); margin-top: 4px;
+}
+.ph-actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+}
 
 /* ═══════════════════════════════════════════
-   STATS CARDS
+   KPI STATS GRID
 ═══════════════════════════════════════════ */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 26px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 28px;
 }
-
 .stat-card {
     background: var(--s1);
     border: 1px solid var(--bdr);
     border-radius: var(--r);
     padding: 20px 22px;
-    display: flex; align-items: flex-start; gap: 14px;
-    transition: border-color .2s;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+    box-shadow: var(--shadow-sm);
 }
-.stat-card:hover { border-color: var(--bdr2); }
-
+.stat-card:hover {
+    border-color: var(--bdr2);
+    transform: translateY(-2px);
+}
+.stat-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+}
+.stat-lbl {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--txt3);
+}
 .stat-icon {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    display: grid; place-items: center;
-    font-size: 17px; flex-shrink: 0;
+    width: 34px; height: 34px; border-radius: 8px;
+    display: grid; place-items: center; font-size: 14px;
 }
-.si-blue  { background: rgba(0,119,182,0.14); color: var(--a2); }
-.si-cyan  { background: rgba(0,200,224,0.10); color: var(--a); }
-.si-green { background: rgba(16,217,160,0.10); color: var(--ok); }
-.si-warn  { background: rgba(240,180,41,0.10); color: var(--warn); }
-.si-crit  { background: rgba(249,96,96,0.10); color: var(--crit); }
+.si-indigo { background: var(--a-soft); color: var(--a); }
+.si-emerald{ background: var(--ok-soft); color: var(--ok); }
+.si-amber  { background: var(--warn-soft); color: var(--warn); }
+.si-rose   { background: var(--crit-soft); color: var(--crit); }
+.si-blue   { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
 
-.stat-body {}
-.stat-num  { font-size: 26px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-.stat-lbl  { font-size: 12px; color: var(--txt2); margin-top: 4px; }
+.stat-num {
+    font-size: 26px; font-weight: 800;
+    letter-spacing: -0.6px; line-height: 1.1;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+.stat-sub {
+    font-size: 12px; color: var(--txt3); margin-top: 6px;
+}
 
 /* ═══════════════════════════════════════════
    EXPIRY ALERT BANNER
 ═══════════════════════════════════════════ */
 .expiry-alert {
-    background: rgba(249,96,96,0.07);
-    border: 1px solid rgba(249,96,96,0.16);
+    background: var(--crit-soft);
+    border: 1px solid var(--crit-bdr);
     border-radius: var(--r);
-    padding: 14px 18px;
+    padding: 14px 20px;
     display: flex; align-items: center; gap: 14px;
-    margin-bottom: 22px;
-    flex-wrap: wrap;
+    margin-bottom: 24px; flex-wrap: wrap;
 }
-
 .expiry-alert-icon {
-    width: 38px; height: 38px;
-    background: rgba(249,96,96,0.12);
-    border-radius: 9px;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(244, 63, 94, 0.2);
     display: grid; place-items: center;
-    color: var(--crit); font-size: 16px;
-    flex-shrink: 0;
-    animation: pulse-alert 2.5s ease infinite;
+    color: var(--crit); font-size: 16px; flex-shrink: 0;
 }
-@keyframes pulse-alert {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(249,96,96,0); }
-    50%       { box-shadow: 0 0 0 6px rgba(249,96,96,0.15); }
+.expiry-alert-text {
+    flex: 1; min-width: 220px;
 }
-
-.expiry-alert-text { flex: 1; min-width: 180px; }
-.expiry-alert-text strong { display: block; font-size: 14px; color: var(--crit); }
-.expiry-alert-text span   { font-size: 13px; color: var(--txt2); }
-
+.expiry-alert-text strong {
+    display: block; font-size: 14px; font-weight: 700; color: #ffffff;
+}
+.expiry-alert-text span {
+    font-size: 12.5px; color: var(--txt2);
+}
 .expiry-alert a {
-    padding: 7px 16px; border-radius: 7px;
-    background: rgba(249,96,96,0.10);
-    border: 1px solid rgba(249,96,96,0.20);
-    color: var(--crit); text-decoration: none;
-    font-size: 13px; font-weight: 600;
-    white-space: nowrap;
-    transition: background .18s;
+    padding: 6px 14px; border-radius: var(--r-sm);
+    background: rgba(244, 63, 94, 0.18);
+    border: 1px solid var(--crit-bdr);
+    color: #ffffff; text-decoration: none;
+    font-size: 12.5px; font-weight: 600;
+    transition: background 0.15s;
 }
-.expiry-alert a:hover { background: rgba(249,96,96,0.18); }
+.expiry-alert a:hover {
+    background: rgba(244, 63, 94, 0.3);
+}
 
 /* ═══════════════════════════════════════════
-   TABLE SECTION
+   DATA TABLE SECTION
 ═══════════════════════════════════════════ */
-.tbl-section {
+.tbl-card {
     background: var(--s1);
     border: 1px solid var(--bdr);
     border-radius: var(--r);
     overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
 }
-
-.tbl-header {
+.tbl-card-header {
     padding: 18px 22px;
     border-bottom: 1px solid var(--bdr);
     display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 12px;
+    flex-wrap: wrap; gap: 14px;
+    background: var(--s2);
+}
+.tbl-card-title {
+    font-size: 15px; font-weight: 700; color: #ffffff;
+    display: flex; align-items: center; gap: 8px;
+}
+.tbl-card-meta {
+    font-size: 12.5px; color: var(--txt3); margin-top: 2px;
+}
+.tbl-controls {
+    display: flex; align-items: center; gap: 10px;
 }
 
-.tbl-title { font-size: 15px; font-weight: 700; }
-.tbl-meta  { font-size: 13px; color: var(--txt2); }
-
-.tbl-controls { display: flex; align-items: center; gap: 10px; }
-
-/* Search */
-.search-wrap {
-    position: relative;
-}
+.search-wrap { position: relative; }
 .search-wrap i {
     position: absolute; left: 11px; top: 50%;
     transform: translateY(-50%);
-    color: var(--txt3); font-size: 13px;
-    pointer-events: none;
+    color: var(--txt3); font-size: 12px; pointer-events: none;
 }
-#search-inp {
-    background: var(--s2);
+.table-search-inp {
+    background: var(--s1);
     border: 1px solid var(--bdr);
-    border-radius: 8px;
-    padding: 8px 12px 8px 34px;
+    border-radius: var(--r-sm);
+    padding: 7px 12px 7px 32px;
     font-size: 13px; font-weight: 500;
-    font-family: 'Inter', sans-serif;
-    color: var(--txt);
-    width: 220px;
-    outline: none; transition: all .18s;
+    font-family: inherit; color: var(--txt);
+    width: 210px; outline: none;
+    transition: all 0.15s ease;
 }
-#search-inp::placeholder { color: var(--txt3); }
-#search-inp:focus {
+.table-search-inp:focus {
     border-color: var(--a);
-    background: rgba(0,200,224,0.04);
-    width: 260px;
+    box-shadow: 0 0 0 2px var(--a-soft);
+    width: 250px;
 }
 
-/* Table */
-.inv-table {
+/* Tables */
+.data-table {
     width: 100%; border-collapse: collapse;
-    font-size: 13.5px;
+    font-size: 13px; text-align: left;
 }
-
-.inv-table th {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.8px; text-transform: uppercase;
+.data-table th {
+    background: var(--s2);
     color: var(--txt3);
-    padding: 11px 16px;
-    text-align: left;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 12px 18px;
     border-bottom: 1px solid var(--bdr);
     white-space: nowrap;
-    background: var(--s2);
 }
-
-.inv-table td {
-    padding: 12px 16px;
+.data-table td {
+    padding: 13px 18px;
     border-bottom: 1px solid var(--bdr);
     vertical-align: middle;
+    color: var(--txt2);
+}
+.data-table tbody tr {
+    transition: background 0.12s ease;
+}
+.data-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+.data-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
-.inv-table tbody tr { transition: background .15s; }
-.inv-table tbody tr:hover td { background: rgba(0,200,224,0.03); }
-.inv-table tbody tr:last-child td { border-bottom: none; }
+/* Row states */
+.row-dead td { background: rgba(225, 29, 72, 0.04); }
+.row-crit td { background: rgba(244, 63, 94, 0.03); }
+.row-warn td { background: rgba(245, 158, 11, 0.02); }
 
-/* Row status indicators (left border via first td) */
-.inv-table td:first-child { border-left: 3px solid transparent; }
-
-.row-ok   td:first-child { border-left-color: var(--ok); }
-.row-warn td:first-child { border-left-color: var(--warn); }
-.row-crit td:first-child { border-left-color: var(--crit); }
-.row-dead td:first-child { border-left-color: var(--dead); }
-
-.row-dead td { background: rgba(255,51,51,0.04); }
-.row-crit td { background: rgba(249,96,96,0.03); }
-.row-warn td { background: rgba(240,180,41,0.03); }
-
-/* Cell types */
-.cell-product { font-weight: 600; letter-spacing: .3px; }
-
+/* Typography inside cells */
+.cell-strong {
+    font-weight: 700; color: #ffffff;
+}
 .cell-batch {
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12.5px; color: var(--txt2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 600;
+    background: var(--s2);
+    border: 1px solid var(--bdr2);
+    padding: 2px 7px; border-radius: 4px;
+    color: #cbd5e1;
+}
+.cell-price {
+    font-weight: 600; color: #e2e8f0;
+    font-variant-numeric: tabular-nums;
+}
+.cell-val {
+    font-weight: 700; color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+.cell-num {
+    font-weight: 700; color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Inline Quantity Stepper */
+.qty-stepper {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--s2);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r-sm);
+    padding: 2px 4px;
+}
+.step-val {
+    font-weight: 700; font-size: 13px; color: #ffffff;
+    padding: 0 6px; min-width: 28px; text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+.btn-step {
+    width: 24px; height: 24px;
+    border-radius: 4px; border: none;
+    background: transparent; color: var(--txt2);
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: grid; place-items: center;
+    transition: all 0.12s ease;
+}
+.btn-step:hover {
+    background: var(--a);
+    color: #ffffff;
+}
+.btn-step-minus:hover {
+    background: var(--crit);
+    color: #ffffff;
+}
+
+/* Action button icons */
+.action-group {
+    display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+}
+.btn-icon-action {
+    width: 30px; height: 30px; border-radius: var(--r-sm);
     background: var(--s2); border: 1px solid var(--bdr);
-    border-radius: 5px; padding: 2px 8px;
-    white-space: nowrap; display: inline-block;
+    color: var(--txt2); cursor: pointer;
+    display: grid; place-items: center;
+    font-size: 12px; transition: all 0.15s ease;
+}
+.btn-icon-action:hover {
+    color: #ffffff; border-color: var(--bdr2);
+    background: var(--s3);
+}
+.btn-icon-action.del:hover {
+    background: var(--crit-soft);
+    border-color: var(--crit-bdr);
+    color: var(--crit);
 }
 
-.cell-qty { font-weight: 700; font-variant-numeric: tabular-nums; }
-
-.cell-date { color: var(--txt2); font-size: 13px; font-variant-numeric: tabular-nums; }
-
-/* Expiry badges */
-.xbadge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 3px 9px; border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-    letter-spacing: .2px; white-space: nowrap;
-}
-.xb-ok   { background: rgba(16,217,160,0.10); color: var(--ok);   border: 1px solid rgba(16,217,160,0.18); }
-.xb-warn { background: rgba(240,180,41,0.10); color: var(--warn); border: 1px solid rgba(240,180,41,0.18); }
-.xb-crit { background: rgba(249,96,96,0.10);  color: var(--crit); border: 1px solid rgba(249,96,96,0.18); }
-.xb-dead { background: rgba(255,51,51,0.12);  color: var(--dead); border: 1px solid rgba(255,51,51,0.22); }
-
-/* Empty state */
-.empty-state {
-    text-align: center; padding: 70px 24px;
-}
-.empty-icon {
-    font-size: 48px; margin-bottom: 16px;
-    background: var(--grad);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    opacity: .6;
-}
-.empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.empty-sub   { font-size: 14px; color: var(--txt2); margin-bottom: 24px; }
-
-/* No-results row */
-.no-results-row { display: none; }
-.no-results-row td { text-align: center; padding: 36px; color: var(--txt2); font-size: 14px; }
-
-/* Legend */
-.legend {
-    display: flex; align-items: center; gap: 16px;
-    padding: 12px 22px;
+/* Table empty & footer */
+.no-results-row { display: none; text-align: center; padding: 28px; color: var(--txt3); }
+.tbl-legend {
+    padding: 12px 20px;
     border-top: 1px solid var(--bdr);
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 18px;
+    flex-wrap: wrap; font-size: 12px; color: var(--txt3);
+    background: var(--s2);
 }
-.legend-item {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 12px; color: var(--txt2);
-}
-.legend-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    flex-shrink: 0;
-}
-.ld-ok   { background: var(--ok); }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+.ld-ok { background: var(--ok); }
 .ld-warn { background: var(--warn); }
 .ld-crit { background: var(--crit); }
 .ld-dead { background: var(--dead); }
 
 /* ═══════════════════════════════════════════
-   PAGE HEADER
+   EDIT BATCH MODAL
 ═══════════════════════════════════════════ */
-.page-topbar {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    margin-bottom: 26px; gap: 16px; flex-wrap: wrap;
+.modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(4, 7, 13, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+    background: var(--s1);
+    border: 1px solid var(--bdr2);
+    border-radius: var(--r-lg);
+    width: 100%; max-width: 440px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
 }
 
-.ph-titles h1  { font-size: 23px; font-weight: 800; letter-spacing: -.4px; margin-bottom: 3px; }
-.ph-titles p   { font-size: 13.5px; color: var(--txt2); }
-
-.ph-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px)  {
-    .stats-grid  { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .tbl-header  { flex-direction: column; align-items: flex-start; }
-    #search-inp  { width: 100%; }
-    #search-inp:focus { width: 100%; }
-    .tbl-controls { width: 100%; }
-    .search-wrap  { flex: 1; }
-    .inv-table th:nth-child(2),
-    .inv-table td:nth-child(2) { display: none; } /* hide batch on small screens */
-    .stat-num  { font-size: 22px; }
+.modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--bdr);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--s2);
 }
-@media (max-width: 380px)  { .stats-grid { grid-template-columns: 1fr 1fr; } }
+.modal-title {
+    font-size: 15px; font-weight: 700; color: #ffffff;
+    display: flex; align-items: center; gap: 8px;
+}
+.modal-close {
+    background: none; border: none;
+    color: var(--txt3); font-size: 16px; cursor: pointer;
+    padding: 4px; border-radius: 4px;
+}
+.modal-close:hover { color: #ffffff; }
+
+.modal-body {
+    padding: 22px;
+}
+.m-field { margin-bottom: 16px; }
+.m-field label {
+    display: block; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--txt2); margin-bottom: 6px;
+}
+.m-input {
+    width: 100%; background: var(--s2);
+    border: 1px solid var(--bdr); border-radius: var(--r-sm);
+    padding: 9px 12px; font-size: 13.5px; font-family: inherit;
+    color: var(--txt); outline: none; transition: border-color 0.15s;
+}
+.m-input:focus { border-color: var(--a); }
+.m-readonly {
+    background: #0d1424; color: var(--txt3); font-family: 'JetBrains Mono', monospace;
+}
+.modal-actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;
+}
 </style>
 {% endblock %}
 
-
 {% block content %}
 
-{# ── Compute stats ─────────────────────────────────── #}
-{% set ns = namespace(total_qty=0) %}
-{% set seen = [] %}
+{# ── Compute Totals ── #}
+{% set ns = namespace(total_units=0, total_val=0.0, unique_prods=[]) %}
 {% for item in inventory %}
-    {% set ns.total_qty = ns.total_qty + item[4] %}
-    {% if item[2] not in seen %}{% if seen.append(item[2]) %}{% endif %}{% endif %}
+    {% set ns.total_units = ns.total_units + item[4] %}
+    {% set ns.total_val = ns.total_val + (item[4] * item[6]) %}
+    {% if item[2] not in ns.unique_prods %}
+        {% set _ = ns.unique_prods.append(item[2]) %}
+    {% endif %}
 {% endfor %}
 
-{# ── Page header ───────────────────────────────────── #}
+{# ── Page Header ── #}
 <div class="page-topbar">
     <div class="ph-titles">
-        <h1><i class="fas fa-chart-pie" style="color:var(--a);margin-right:10px;font-size:20px"></i>Dashboard</h1>
-        <p>Overview of your current inventory and expiry status</p>
+        <h1>
+            <i class="fas fa-cubes-stacked" style="color:var(--a);font-size:22px"></i>
+            Inventory Dashboard
+        </h1>
+        <p>Live inventory ledger, valuation tracking, and 7-day demand predictions</p>
     </div>
     <div class="ph-actions">
+        <button type="button" class="btn btn-ghost" onclick="openProductAdjustModal()">
+            <i class="fas fa-sliders" style="color:var(--a)"></i> Adjust Stock (+/&minus;)
+        </button>
         <a href="{{ url_for('sell_product_route') }}" class="btn btn-ghost">
-            <i class="fas fa-cart-arrow-down"></i> Sell
+            <i class="fas fa-cart-arrow-down" style="color:var(--ok)"></i> Sell Stock (FEFO)
         </a>
         <a href="{{ url_for('add_batchs') }}" class="btn btn-prim">
-            <i class="fas fa-plus"></i> Add Batch
+            <i class="fas fa-plus"></i> Add New Batch
         </a>
     </div>
 </div>
 
-{# ── Stats cards ────────────────────────────────────── #}
+{# ── KPI Cards Grid ── #}
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon si-blue"><i class="fas fa-tags"></i></div>
-        <div class="stat-body">
-            <div class="stat-num" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ seen | length }}</div>
-            <div class="stat-lbl">Unique Products</div>
+        <div class="stat-top">
+            <span class="stat-lbl">Inventory Value</span>
+            <div class="stat-icon si-emerald"><i class="fas fa-indian-rupee-sign"></i></div>
         </div>
+        <div class="stat-num">₹{{ "%.2f"|format(ns.total_val) }}</div>
+        <div class="stat-sub">Across {{ inventory | length }} active batches</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-icon si-cyan"><i class="fas fa-layer-group"></i></div>
-        <div class="stat-body">
-            <div class="stat-num">{{ inventory | length }}</div>
-            <div class="stat-lbl">Total Batches</div>
+        <div class="stat-top">
+            <span class="stat-lbl">Total Stock Units</span>
+            <div class="stat-icon si-indigo"><i class="fas fa-boxes-stacked"></i></div>
         </div>
+        <div class="stat-num">{{ ns.total_units }}</div>
+        <div class="stat-sub">{{ ns.unique_prods | length }} distinct products</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-icon si-green"><i class="fas fa-box-open"></i></div>
-        <div class="stat-body">
-            <div class="stat-num" style="color:var(--ok)">{{ ns.total_qty }}</div>
-            <div class="stat-lbl">Total Units</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon {% if expiring_items | length > 0 %}si-crit{% else %}si-green{% endif %}">
-            <i class="fas fa-hourglass-half"></i>
-        </div>
-        <div class="stat-body">
-            <div class="stat-num" style="color:{% if expiring_items | length > 0 %}var(--crit){% else %}var(--ok){% endif %}">
-                {{ expiring_items | length }}
+        <div class="stat-top">
+            <span class="stat-lbl">Expiring &le; 30 Days</span>
+            <div class="stat-icon {% if expiring_items | length > 0 %}si-rose{% else %}si-emerald{% endif %}">
+                <i class="fas fa-hourglass-half"></i>
             </div>
-            <div class="stat-lbl">Expiring ≤ 30 days</div>
+        </div>
+        <div class="stat-num" style="{% if expiring_items | length > 0 %}color:var(--crit){% endif %}">
+            {{ expiring_items | length }}
+        </div>
+        <div class="stat-sub">Need urgent dispatch</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-top">
+            <span class="stat-lbl">Restock Required</span>
+            <div class="stat-icon {% if forecast_data and forecast_data.summary.restock_suggested_count > 0 %}si-rose{% else %}si-emerald{% endif %}">
+                <i class="fas fa-truck-ramp-box"></i>
+            </div>
+        </div>
+        <div class="stat-num" style="{% if forecast_data and forecast_data.summary.restock_suggested_count > 0 %}color:var(--crit){% endif %}">
+            {{ forecast_data.summary.restock_suggested_count if forecast_data else 0 }}
+        </div>
+        <div class="stat-sub">
+            Est. Cost: ₹{{ "%.2f"|format(forecast_data.summary.total_restock_investment if forecast_data else 0.0) }}
         </div>
     </div>
 </div>
 
-{# ── Expiry alert banner ─────────────────────────────── #}
+{# ── Expiry Alert Banner ── #}
 {% if expiring_items | length > 0 %}
 <div class="expiry-alert">
     <div class="expiry-alert-icon"><i class="fas fa-triangle-exclamation"></i></div>
     <div class="expiry-alert-text">
-        <strong>
-            {% set expired_cnt = [] %}
-            {% for item in expiring_items %}{% if item[5] <= today_date %}{% if expired_cnt.append(1) %}{% endif %}{% endif %}{% endfor %}
-            {% if expired_cnt | length > 0 %}
-                {{ expired_cnt | length }} batch{{ 'es' if expired_cnt | length > 1 }} expired · 
-            {% endif %}
-            {{ expiring_items | length }} batch{{ 'es' if expiring_items | length > 1 }} need attention
-        </strong>
-        <span>Review your stock to prevent losses from expired inventory</span>
+        <strong>{{ expiring_items | length }} batch{{ 'es' if expiring_items | length > 1 else '' }} require attention</strong>
+        <span>Some products are nearing their expiration date. Sell via FEFO or review batches.</span>
     </div>
-    <a href="{{ url_for('get_expiring_stock_route') }}">View expiring stock <i class="fas fa-arrow-right" style="font-size:11px;margin-left:4px"></i></a>
+    <a href="{{ url_for('get_expiring_stock_route') }}">Review Expiring Stock &rarr;</a>
 </div>
 {% endif %}
 
-{# ── Inventory table ─────────────────────────────────── #}
-<div class="tbl-section">
-    <div class="tbl-header">
+{# ── SECTION 1: Product-Wise Demand Prediction & Smart Restock ── #}
+<div class="tbl-card">
+    <div class="tbl-card-header">
         <div>
-            <div class="tbl-title">Inventory</div>
-            <div class="tbl-meta">{{ inventory | length }} batch{{ 'es' if inventory | length != 1 else '' }} · sorted by earliest expiry</div>
+            <div class="tbl-card-title">
+                <i class="fas fa-chart-line" style="color:var(--a)"></i>
+                Product Demand Forecast & Smart Restock
+            </div>
+            <div class="tbl-card-meta">
+                {% if forecast_data and forecast_data.history_period %}
+                    7-Calendar-Day Moving Average · Sales: {{ forecast_data.history_period }} &rarr; Forecast: {{ forecast_data.forecast_period }}
+                {% else %}
+                    Demand prediction powered by 7-calendar-day moving average
+                {% endif %}
+            </div>
         </div>
         <div class="tbl-controls">
             <div class="search-wrap">
                 <i class="fas fa-magnifying-glass"></i>
-                <input type="text" id="search-inp" placeholder="Search product or batch…" oninput="filterTable()">
+                <input type="text" id="fc-search-inp" class="table-search-inp" placeholder="Search forecast..." oninput="filterForecastTable()">
+            </div>
+        </div>
+    </div>
+
+    {% if forecast_data and forecast_data.products %}
+    <div style="overflow-x:auto">
+        <table class="data-table" id="fc-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Unit Price</th>
+                    <th>Current Stock</th>
+                    <th>Stock Value</th>
+                    <th>Avg Daily Demand</th>
+                    <th>7-Day Forecast</th>
+                    <th>Suggested Restock</th>
+                    <th>Restock Investment</th>
+                    <th>Status</th>
+                    <th style="text-align:right">Action</th>
+                </tr>
+            </thead>
+            <tbody id="fc-body">
+                {% for item in forecast_data.products %}
+                {% if item.status == 'Restock Suggested' %}
+                    {% set f_row_cls = 'row-crit' %}
+                    {% set f_badge_cls = 'xb-crit' %}
+                    {% set f_icon = 'fa-truck-ramp-box' %}
+                {% elif item.status == 'Low Stock' %}
+                    {% set f_row_cls = 'row-warn' %}
+                    {% set f_badge_cls = 'xb-warn' %}
+                    {% set f_icon = 'fa-triangle-exclamation' %}
+                {% elif item.status == 'Sufficient Stock' %}
+                    {% set f_row_cls = '' %}
+                    {% set f_badge_cls = 'xb-ok' %}
+                    {% set f_icon = 'fa-circle-check' %}
+                {% else %}
+                    {% set f_row_cls = '' %}
+                    {% set f_badge_cls = 'xb-muted' %}
+                    {% set f_icon = 'fa-circle-info' %}
+                {% endif %}
+
+                <tr class="{{ f_row_cls }} fc-row" data-search="{{ item.product_name | lower }}">
+                    <td style="color:var(--txt3)">{{ loop.index }}</td>
+                    <td class="cell-strong">{{ item.product_name }}</td>
+                    <td class="cell-price">₹{{ "%.2f"|format(item.unit_price) }}</td>
+                    <td>
+                        <span class="cell-num" style="{% if item.current_stock == 0 %}color:var(--crit){% endif %}">
+                            {{ item.current_stock }}
+                        </span>
+                        <span style="font-size:11px;color:var(--txt3)">units</span>
+                    </td>
+                    <td class="cell-val">₹{{ "%.2f"|format(item.inventory_value) }}</td>
+                    <td>
+                        {% if item.has_data %}
+                            <span class="cell-num">{{ item.avg_daily_demand }}</span>
+                            <span style="font-size:11px;color:var(--txt3)">/ day</span>
+                        {% else %}
+                            <span style="color:var(--txt3)">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.has_data %}
+                            <span class="cell-num">{{ item.forecast_7_days }}</span>
+                            <span style="font-size:11px;color:var(--txt3)">units</span>
+                        {% else %}
+                            <span style="color:var(--txt3)">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.has_data %}
+                            {% if item.suggested_restock > 0 %}
+                                <strong style="color:var(--crit);font-size:13.5px">+{{ item.suggested_restock }}</strong>
+                                <span style="font-size:11px;color:var(--txt3)">units</span>
+                            {% else %}
+                                <span style="color:var(--ok)">0 (Sufficient)</span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color:var(--txt3)">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="cell-price">
+                        {% if item.suggested_restock > 0 %}
+                            <strong style="color:var(--crit)">₹{{ "%.2f"|format(item.estimated_restock_cost) }}</strong>
+                        {% else %}
+                            <span style="color:var(--txt3)">₹0.00</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="xbadge {{ f_badge_cls }}">
+                            <i class="fas {{ f_icon }}" style="font-size:10px"></i>
+                            {{ item.status_label }}
+                        </span>
+                    </td>
+                    <td style="text-align:right">
+                        <button
+                            type="button"
+                            class="btn-icon-action"
+                            title="Adjust Stock for {{ item.product_name }}"
+                            onclick="openProductAdjustModal('{{ item.product_name }}')"
+                        >
+                            <i class="fas fa-sliders"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="no-results-row" id="fc-no-results">
+                    <td colspan="11" style="text-align:center;padding:24px;color:var(--txt3)">
+                        <i class="fas fa-magnifying-glass" style="margin-right:8px;opacity:0.6"></i>
+                        No products match your forecast search
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tbl-legend">
+        <div class="legend-item"><div class="legend-dot ld-ok"></div>Sufficient Stock</div>
+        <div class="legend-item"><div class="legend-dot ld-warn"></div>Low Stock (&le; 2 days demand)</div>
+        <div class="legend-item"><div class="legend-dot ld-crit"></div>Restock Suggested (Projected Shortage)</div>
+        <div class="legend-item"><span class="xbadge xb-muted" style="padding:1px 6px;font-size:10px"><i class="fas fa-circle-info"></i> Insufficient sales data</span> (Requires recorded sales)</div>
+    </div>
+    {% else %}
+    <div style="padding: 36px; text-align: center; color: var(--txt3);">
+        <i class="fas fa-chart-line" style="font-size: 24px; margin-bottom: 8px; opacity: 0.5"></i>
+        <p>No products in inventory yet. Add your first batch to start tracking forecasts.</p>
+    </div>
+    {% endif %}
+</div>
+
+{# ── SECTION 2: Inventory Batches & Stock Management ── #}
+<div class="tbl-card">
+    <div class="tbl-card-header">
+        <div>
+            <div class="tbl-card-title">
+                <i class="fas fa-boxes-stacked" style="color:var(--a)"></i>
+                Inventory Batches &amp; Quantity Management
+            </div>
+            <div class="tbl-card-meta">
+                {{ inventory | length }} batch{{ 'es' if inventory | length != 1 else '' }} · Sorted by earliest expiration (FEFO priority)
+            </div>
+        </div>
+        <div class="tbl-controls">
+            <div class="search-wrap">
+                <i class="fas fa-magnifying-glass"></i>
+                <input type="text" id="inv-search-inp" class="table-search-inp" placeholder="Search batch or product..." oninput="filterInventoryTable()">
             </div>
         </div>
     </div>
 
     {% if inventory %}
     <div style="overflow-x:auto">
-        <table class="inv-table" id="inv-table">
+        <table class="data-table" id="inv-table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Batch No.</th>
+                    <th>Batch No</th>
                     <th>Product</th>
-                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Stock Quantity</th>
+                    <th>Batch Valuation</th>
                     <th>Expiry Date</th>
                     <th>Status</th>
+                    <th style="text-align:right">Actions</th>
                 </tr>
             </thead>
             <tbody id="inv-body">
                 {% for item in inventory %}
-                {# Determine status class #}
+                {# Expiry calculation #}
                 {% if item[5] <= today_date %}
                     {% set row_cls = 'row-dead' %}
                     {% set badge_cls = 'xb-dead' %}
@@ -398,48 +657,88 @@
                     {% set badge_ico = 'fa-circle-exclamation' %}
                     {% set badge_lbl = 'Caution' %}
                 {% else %}
-                    {% set row_cls = 'row-ok' %}
+                    {% set row_cls = '' %}
                     {% set badge_cls = 'xb-ok' %}
                     {% set badge_ico = 'fa-circle-check' %}
                     {% set badge_lbl = 'Good' %}
                 {% endif %}
 
+                {% set item_val = item[4] * item[6] %}
+
                 <tr class="{{ row_cls }} inv-row" data-search="{{ item[2] | lower }} {{ item[3] | lower }}">
-                    <td style="color:var(--txt3);font-size:12px">{{ loop.index }}</td>
-                    <td><span class="cell-product">{{ item[3] }}</span></td>
-                    <td><span class="cell-batch">{{ item[2] }}</span></td>
-                    <td><span class="cell-qty">{{ item[4] }}</span></td>
-                    <td><span class="cell-date">{{ item[5] }}</span></td>
+                    <td style="color:var(--txt3)">{{ loop.index }}</td>
+                    <td><span class="cell-batch">{{ item[3] }}</span></td>
+                    <td class="cell-strong">{{ item[2] }}</td>
+                    <td class="cell-price" style="cursor:pointer" title="Click to edit price" onclick="openEditModal('{{ item[3] }}', '{{ item[2] }}', '{{ item[4] }}', '{{ item[6] }}', '{{ item[5] }}')">
+                        <span style="border-bottom:1px dashed var(--bdr2)">₹{{ "%.2f"|format(item[6]) }}</span>
+                        <i class="fas fa-pencil" style="font-size:10px;color:var(--txt3);margin-left:4px;opacity:0.6"></i>
+                    </td>
+                    <td>
+                        <!-- Inline Quick Stepper for +/- Qty Adjustment -->
+                        <div class="qty-stepper">
+                            <form method="POST" action="{{ url_for('adjust_batch_route', batch_no=item[3]) }}" style="display:inline">
+                                <input type="hidden" name="delta" value="-1">
+                                <button type="submit" class="btn-step btn-step-minus" title="Decrease quantity by 1" {% if item[4] <= 1 %}onclick="return confirm('Reducing this batch will delete it. Proceed?');"{% endif %}>&minus;</button>
+                            </form>
+                            <span class="step-val">{{ item[4] }}</span>
+                            <form method="POST" action="{{ url_for('adjust_batch_route', batch_no=item[3]) }}" style="display:inline">
+                                <input type="hidden" name="delta" value="1">
+                                <button type="submit" class="btn-step" title="Increase quantity by 1">&plus;</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td class="cell-val">₹{{ "%.2f"|format(item_val) }}</td>
+                    <td>
+                        <span style="font-weight:600;color:var(--txt)">{{ item[5] }}</span>
+                    </td>
                     <td>
                         <span class="xbadge {{ badge_cls }}">
                             <i class="fas {{ badge_ico }}" style="font-size:10px"></i>
                             {{ badge_lbl }}
                         </span>
                     </td>
+                    <td style="text-align:right">
+                        <div class="action-group">
+                            <!-- Quick Edit Button -->
+                            <button
+                                type="button"
+                                class="btn-icon-action"
+                                title="Edit Batch Details"
+                                onclick="openEditModal('{{ item[3] }}', '{{ item[2] }}', '{{ item[4] }}', '{{ item[6] }}', '{{ item[5] }}')"
+                            >
+                                <i class="fas fa-pen-to-square"></i>
+                            </button>
+                            <!-- Delete Batch Form -->
+                            <form method="POST" action="{{ url_for('delete_batch_route', batch_no=item[3]) }}" style="display:inline" onsubmit="return confirm('Are you sure you want to permanently delete batch {{ item[3] }} ({{ item[2] }})?');">
+                                <button type="submit" class="btn-icon-action del" title="Delete Batch">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
-                <tr class="no-results-row" id="no-results">
-                    <td colspan="6">
-                        <i class="fas fa-magnifying-glass" style="margin-right:8px;opacity:.5"></i>
-                        No products match your search
+                <tr class="no-results-row" id="inv-no-results">
+                    <td colspan="9" style="text-align:center;padding:24px;color:var(--txt3)">
+                        <i class="fas fa-magnifying-glass" style="margin-right:8px;opacity:0.6"></i>
+                        No batches match your search
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="legend">
-        <div class="legend-item"><div class="legend-dot ld-ok"></div>Good (> 30 days)</div>
-        <div class="legend-item"><div class="legend-dot ld-warn"></div>Caution (≤ 30 days)</div>
-        <div class="legend-item"><div class="legend-dot ld-crit"></div>Critical (≤ 10 days)</div>
+    <div class="tbl-legend">
+        <div class="legend-item"><div class="legend-dot ld-ok"></div>Good (&gt; 30 days)</div>
+        <div class="legend-item"><div class="legend-dot ld-warn"></div>Caution (&le; 30 days)</div>
+        <div class="legend-item"><div class="legend-dot ld-crit"></div>Critical (&le; 10 days)</div>
         <div class="legend-item"><div class="legend-dot ld-dead"></div>Expired</div>
     </div>
-
     {% else %}
-    <div class="empty-state">
-        <div class="empty-icon"><i class="fas fa-boxes-stacked"></i></div>
-        <div class="empty-title">Your inventory is empty</div>
-        <div class="empty-sub">Start by adding your first product batch to the system.</div>
+    <div style="padding: 48px; text-align: center; color: var(--txt3);">
+        <i class="fas fa-box-open" style="font-size: 32px; margin-bottom: 12px; opacity: 0.5"></i>
+        <h3 style="color:#ffffff;font-size:16px;margin-bottom:6px">No batches in inventory</h3>
+        <p style="margin-bottom:18px">Get started by registering your first product batch with expiry dates and pricing.</p>
         <a href="{{ url_for('add_batchs') }}" class="btn btn-prim">
             <i class="fas fa-plus"></i> Add First Batch
         </a>
@@ -447,15 +746,124 @@
     {% endif %}
 </div>
 
-{% endblock %}
+{# ── Quick Edit Modal ── #}
+<div class="modal-overlay" id="editModal" onclick="handleModalClick(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-pen-to-square" style="color:var(--a)"></i>
+                Edit Batch Details
+            </div>
+            <button type="button" class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        <form method="POST" id="editBatchForm" action="">
+            <div class="modal-body">
+                <div class="m-field">
+                    <label>Product Name</label>
+                    <input type="text" id="m_product_name" class="m-input m-readonly" readonly>
+                </div>
+                <div class="m-field">
+                    <label>Batch Number</label>
+                    <input type="text" id="m_batch_no" class="m-input m-readonly" readonly>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="m-field">
+                        <label for="m_quantity">Stock Quantity</label>
+                        <input type="number" id="m_quantity" name="quantity" class="m-input" min="1" required>
+                    </div>
+                    <div class="m-field">
+                        <label for="m_unit_price">Unit Price (₹)</label>
+                        <input type="number" step="0.01" min="0" id="m_unit_price" name="unit_price" class="m-input" placeholder="0.00" required>
+                    </div>
+                </div>
+                <div class="m-field">
+                    <label for="m_expiry_date">Expiry Date</label>
+                    <input type="date" id="m_expiry_date" name="expiry_date" class="m-input" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-prim">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
+{# ── Quick Product Stock Adjust Modal ── #}
+<div class="modal-overlay" id="prodAdjustModal" onclick="handleProdModalClick(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-sliders" style="color:var(--a)"></i>
+                Adjust Product Stock (+ / &minus;)
+            </div>
+            <button type="button" class="modal-close" onclick="closeProductAdjustModal()">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('adjust_product_route') }}">
+            <input type="hidden" name="redirect_to" value="home">
+            <div class="modal-body">
+                <div class="m-field">
+                    <label for="p_adj_name">Select Product</label>
+                    <select id="p_adj_name" name="product_name" class="m-input" required onchange="handleProdModalSelectChange()">
+                        {% if user_products %}
+                            {% for p in user_products %}
+                                <option value="{{ p.product_name }}" data-price="{{ p.unit_price }}">
+                                    {{ p.product_name }} &mdash; {{ p.total_quantity }} units in stock (₹{{ "%.2f"|format(p.unit_price) }})
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="">No products found</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="m-field">
+                    <label>Operation</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                        <label style="display:flex;align-items:center;gap:6px;background:var(--s2);padding:9px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--bdr);font-size:12px">
+                            <input type="radio" name="action_type" value="increase" id="p_rad_inc" checked onclick="toggleProdModalMode('increase')">
+                            <span style="font-weight:700;color:var(--ok)">+ Add Stock</span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;background:var(--s2);padding:9px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--bdr);font-size:12px">
+                            <input type="radio" name="action_type" value="decrease" id="p_rad_dec" onclick="toggleProdModalMode('decrease')">
+                            <span style="font-weight:700;color:var(--crit)">&minus; Deduct</span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;background:var(--s2);padding:9px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--bdr);font-size:12px">
+                            <input type="radio" name="action_type" value="price_only" id="p_rad_price" onclick="toggleProdModalMode('price_only')">
+                            <span style="font-weight:700;color:var(--a)">🏷️ Price Only</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="m-field" id="p_adj_qty_wrap">
+                        <label for="p_adj_qty">Units Quantity</label>
+                        <input type="number" id="p_adj_qty" name="quantity" class="m-input" value="5" min="1">
+                    </div>
+                    <div class="m-field">
+                        <label for="p_adj_price">Unit Price (₹)</label>
+                        <input type="number" step="0.01" min="0" id="p_adj_price" name="unit_price" class="m-input" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeProductAdjustModal()">Cancel</button>
+                    <button type="submit" class="btn btn-prim">Apply Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
 
 {% block extra_js %}
 <script>
-function filterTable() {
-    const q    = document.getElementById('search-inp').value.trim().toLowerCase();
-    const rows = document.querySelectorAll('.inv-row');
-    const noR  = document.getElementById('no-results');
+// Search filter for Forecast table
+function filterForecastTable() {
+    const q = document.getElementById('fc-search-inp').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('.fc-row');
+    const noR = document.getElementById('fc-no-results');
     let visible = 0;
 
     rows.forEach(row => {
@@ -466,5 +874,105 @@ function filterTable() {
 
     if (noR) noR.style.display = (visible === 0 && q) ? 'table-row' : 'none';
 }
+
+// Search filter for Inventory table
+function filterInventoryTable() {
+    const q = document.getElementById('inv-search-inp').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('.inv-row');
+    const noR = document.getElementById('inv-no-results');
+    let visible = 0;
+
+    rows.forEach(row => {
+        const match = row.dataset.search.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+
+    if (noR) noR.style.display = (visible === 0 && q) ? 'table-row' : 'none';
+}
+
+// Batch Edit Modal handling
+function openEditModal(batchNo, prodName, qty, price, expiry) {
+    document.getElementById('m_batch_no').value = batchNo;
+    document.getElementById('m_product_name').value = prodName;
+    document.getElementById('m_quantity').value = qty;
+    document.getElementById('m_unit_price').value = parseFloat(price) || 0.0;
+    document.getElementById('m_expiry_date').value = expiry;
+
+    const form = document.getElementById('editBatchForm');
+    form.action = '/edit_batch/' + encodeURIComponent(batchNo);
+
+    document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+
+function handleModalClick(e) {
+    if (e.target.id === 'editModal') {
+        closeEditModal();
+    }
+}
+
+// Product Quick Adjust Modal handling
+function openProductAdjustModal(productName = '', currentPrice = '') {
+    const sel = document.getElementById('p_adj_name');
+    if (productName && sel) {
+        sel.value = productName;
+    }
+    const priceInp = document.getElementById('p_adj_price');
+    if (priceInp) {
+        if (currentPrice !== '' && currentPrice !== undefined) {
+            priceInp.value = parseFloat(currentPrice).toFixed(2);
+        } else if (sel && sel.selectedIndex >= 0) {
+            const opt = sel.options[sel.selectedIndex];
+            const pr = opt.getAttribute('data-price') || '';
+            if (pr) priceInp.value = parseFloat(pr).toFixed(2);
+        }
+    }
+    toggleProdModalMode('increase');
+    document.getElementById('p_rad_inc').checked = true;
+    document.getElementById('prodAdjustModal').classList.add('active');
+}
+
+function handleProdModalSelectChange() {
+    const sel = document.getElementById('p_adj_name');
+    if (!sel) return;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt) {
+        const pr = opt.getAttribute('data-price');
+        if (pr) {
+            document.getElementById('p_adj_price').value = parseFloat(pr).toFixed(2);
+        }
+    }
+}
+
+function toggleProdModalMode(mode) {
+    const qtyWrap = document.getElementById('p_adj_qty_wrap');
+    if (mode === 'price_only') {
+        qtyWrap.style.display = 'none';
+    } else {
+        qtyWrap.style.display = 'block';
+    }
+}
+
+function closeProductAdjustModal() {
+    document.getElementById('prodAdjustModal').classList.remove('active');
+}
+
+function handleProdModalClick(e) {
+    if (e.target.id === 'prodAdjustModal') {
+        closeProductAdjustModal();
+    }
+}
+
+// ESC key to close modals
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeEditModal();
+        closeProductAdjustModal();
+    }
+});
 </script>
 {% endblock %}

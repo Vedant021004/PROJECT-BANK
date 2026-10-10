@@ -1,319 +1,303 @@
-# 📦 Inventrack — Inventory Management System
+# 📦 Inventrack — Smart Inventory Management System
+### Product-Wise Demand Prediction · FEFO Expiry Tracking · Valuation & Stock Controls
 
-> A full-stack, multi-user inventory management web application built with **Python Flask** and **SQLite**, featuring intelligent batch tracking, expiry-date alerting, and a Min-Heap powered FEFO (First Expired, First Out) selling algorithm.
-
----
-
-## 🚀 Live Demo
-
-**[https://inventrack.pythonanywhere.com/](https://inventrack.pythonanywhere.com/)**
-
-> Try it live — register with your email, add some batches, and watch the FEFO algorithm in action.
-> Hosted on [PythonAnywhere](https://www.pythonanywhere.com/).
+> A production-grade, full-stack inventory management web application built with **Python (Flask 3.0)** and **SQLite 3**, featuring an algorithmic **Min-Heap FEFO (First Expired, First Out)** dispatch engine, **product-wise 7-calendar-day demand forecasting**, **live pricing & inventory valuation**, and **instant stock quantity controls**.
 
 ---
 
 ## 📌 Table of Contents
 
-- [About the Project](#about-the-project)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [System Architecture](#system-architecture)
-- [Data Structure Design — The Min-Heap](#data-structure-design--the-min-heap)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [Usage](#usage)
-- [API / Routes Reference](#api--routes-reference)
-- [Database Schema](#database-schema)
-- [Future Improvements](#future-improvements)
+- [Overview & What It Does](#-overview--what-it-does)
+- [Key Features](#-key-features)
+- [How It Works (Core Logic & DSA)](#-how-it-works-core-logic--dsa)
+  - [1. Min-Heap FEFO Selling Algorithm](#1-min-heap-fefo-selling-algorithm)
+  - [2. Explainable 7-Day Demand Forecasting & Smart Restock](#2-explainable-7-day-demand-forecasting--smart-restock)
+  - [3. Stock Quantity & Price Adjustment Engine](#3-stock-quantity--price-adjustment-engine)
+- [Tech Stack](#-tech-stack)
+- [Project Directory Structure](#-project-directory-structure)
+- [Database Architecture & Schema](#-database-architecture--schema)
+- [Quick Start / Local Setup Guide](#-quick-start--local-setup-guide)
+- [Running Automated Tests](#-running-automated-tests)
+- [Routes & API Endpoints](#-routes--api-endpoints)
+- [Security & Backup Mechanism](#-security--backup-mechanism)
+- [Author & Acknowledgments](#-author--acknowledgments)
 
 ---
 
-## About the Project
+## 🌟 Overview & What It Does
 
-**Inventrack** solves a real-world problem faced by pharmacies, grocery stores, and warehouses: managing product batches with expiry dates so that the oldest stock is always sold first — minimising waste and financial loss.
+In retail businesses, pharmacies, FMCG distribution, and warehouses, stock loss happens due to two major bottlenecks:
+1. **Expired Inventory Waste**: Newer batches are accidentally sold first while older stock quietly expires on the shelf.
+2. **Poor Demand Visibility**: Businesses either over-order (capital lockup) or stock out on high-velocity items.
 
-The system supports multiple independent users. Each user gets their own isolated inventory, managed through a private in-memory **Min-Heap** that enables O(log n) identification of the nearest-expiry batch at sell time — no full table scans required.
-
----
-
-## Key Features
-
-- **Secure User Registration with OTP Verification** — new accounts are confirmed via a one-time password sent to the user's email before being persisted to the database.
-- **Email Notification on Successful Registration** — users receive a welcome alert once their account is activated.
-- **Batch-Level Inventory Management** — stock is tracked at the individual batch level, including batch number, quantity, and expiry date.
-- **FEFO Sell Algorithm** — when a product is sold, Inventrack automatically deducts from the earliest-expiring batch first, cascading across multiple batches if needed.
-- **Expired Batch Auto-Removal** — batches past their expiry date are skipped and removed automatically during the sell flow.
-- **Expiry Alerts Dashboard** — the dashboard flags items expiring within **10 days** (critical) and **30 days** (caution) with colour-coded warnings.
-- **Multi-User Isolation** — each logged-in user has a private inventory and a dedicated Min-Heap in server memory; no data bleeds between accounts.
-- **Cache-Control Headers** — every response prevents stale page caching, ensuring users always see live inventory data.
-- **Session-Based Authentication** — protected routes redirect unauthenticated users to the login page.
+**Inventrack** completely automates and eliminates these issues:
+- **Automatic Oldest-Stock Dispatch**: Automatically routes sales transactions to the earliest-expiring batch first using a Min-Heap.
+- **Explainable Product Demand Forecasting**: Calculates a mathematically honest 7-calendar-day moving average to project stock shortages and recommend exact restock quantities.
+- **Inventory Valuation (₹)**: Tracks unit prices, total stock value, and the exact investment capital required to fulfill restock needs.
+- **Fast Stock Adjustments**: Allows instant quantity increment (`+`), decrement (`−`), price updates, and batch editing directly from the UI without navigating away.
 
 ---
 
-## Tech Stack
+## 🚀 Key Features
 
-| Layer | Technology |
-|---|---|
-| Backend | Python 3, Flask 3.0 |
-| Database | SQLite 3 (via Python's built-in `sqlite3` module) |
-| Frontend | HTML5, Jinja2 templating |
-| Data Structure | Python `heapq` Min-Heap (custom per-user in-memory cache) |
-| Auth / OTP | Custom OTP generation + SMTP email delivery |
-| SMS Alerts | `sms.py` module (configurable) |
-| Config | `python-dotenv` for environment variable management |
+### 1. 📊 Product-Wise Demand Forecasting & Smart Restock
+- **7-Calendar-Day Moving Average**: Accurately counts non-sales days across the calendar week (not just days with transactions).
+- **Exact Restock Recommendation**: Proactively computes:
+  $$\text{Projected Shortage} = \max(0, \text{7-Day Forecast} - \text{Current Active Stock})$$
+- **Restock Investment Estimation (₹)**: Shows the exact budget needed to restock each product based on its unit price.
+- **Honest "Insufficient Data" Handling**: Products with no recorded sales history clearly display *"Insufficient sales data"* instead of fabricating misleading predictions.
 
----
+### 2. ⚡ Inline Stock & Price Management
+- **Instant Stepper Controls (`+` / `−`)**: Rapidly increase or decrease batch stock with one click right on the dashboard table.
+- **Quick Product Stock Adjustment Modal**: Adjust stock (`+ Add Units` or `− Deduct Units`) or update price by simply choosing the product from a dropdown — no need to remember complex batch IDs.
+- **Batch Edit Modal (`✏️`)**: Edit exact quantities, unit prices (₹), and expiry dates in-place.
+- **Live Inventory Valuation**: Real-time KPI metric card calculating total portfolio valuation across all warehouse batches.
 
-## System Architecture
+### 3. 🛡️ Algorithmic Min-Heap FEFO Selling
+- **O(log n) Dispatch**: Identifies and depletes the nearest-expiring batch in logarithmic time using an in-memory priority queue (`heapq`).
+- **Multi-Batch Cascading**: If an order exceeds a single batch's quantity, the algorithm automatically consumes the earliest batch and cascades the remainder to the next earliest batch.
+- **Automatic Depletion Cleanup**: Depleted batches ($Q \le 0$) are removed automatically from the active inventory.
+- **Expired Stock Protection**: Expired batches are protected from customer dispatch and flagged with critical badges.
 
-```
-┌────────────────────────────────────────────────────┐
-│                    Flask App (app.py)               │
-│  Routes: /, /register, /login, /add_batch,         │
-│          /sell_product, /get_expiring_stock,        │
-│          /verify-otp, /logout                       │
-└────────────┬───────────────────────────────────────┘
-             │
-    ┌────────▼─────────┐      ┌──────────────────────┐
-    │  auth.py         │      │  sms.py              │
-    │  - login()       │      │  - send_otp_email()  │
-    │  - generate_otp()│      │  - registration      │
-    └──────────────────┘      │    alert()           │
-                              └──────────────────────┘
-             │
-    ┌────────▼─────────────────────────────────────┐
-    │  inventory_management.py                      │
-    │  - add_batch()      → INSERT + heap push      │
-    │  - sell_product()   → FEFO loop via heap      │
-    │  - get_all_inventory()                        │
-    │  - get_expiring_stocks()                      │
-    └────────┬─────────────────────────────────────┘
-             │
-    ┌────────▼──────────────────────────────────┐
-    │  heap.py  (In-Memory Min-Heap Cache)       │
-    │  user_heaps = { email: [min-heap] }        │
-    │  - push_batch()                            │
-    │  - get_nearest_expiry(email, product)      │
-    │  - load_from_db(email)                     │
-    │  - clear_heap(email)                       │
-    └────────┬──────────────────────────────────┘
-             │
-    ┌────────▼──────────────────┐
-    │  SQLite — database.db     │
-    │  Tables: user, inventory  │
-    └───────────────────────────┘
-```
+### 4. 🎨 Bespoke Obsidian & Indigo SaaS UI
+- **Modern Theme**: Built with a dark slate palette (`#090d16` background, `#101728` card surfaces, subtle 1px hairline borders `#1e293b`, and electric indigo `#6366f1` accents).
+- **Tabular Monospace Numerals**: Clean currency (₹) and quantity alignment using `JetBrains Mono` and `tabular-nums`.
+- **Toast Notifications**: Responsive flash alert banners for all inventory actions.
 
 ---
 
-## Data Structure Design — The Min-Heap
+## 🧠 How It Works (Core Logic & DSA)
 
-The most technically significant design choice in Inventrack is the **per-user Min-Heap** implemented in `heap.py`.
-
-### Why a Heap?
-
-At sell time, the system must find the batch of a given product with the **earliest expiry date** — this is the FEFO (First Expired, First Out) principle. A naïve approach would query the database and sort results every time. Instead, Inventrack loads each user's inventory into an in-memory Min-Heap on login, enabling:
-
-- **O(log n)** batch insertions (on `add_batch`)
-- **O(k)** nearest-expiry lookup where k = number of batches for that product
-- **Zero redundant DB reads** during the sell loop
-
-### How it works
-
+### 1. Min-Heap FEFO Selling Algorithm
+Inventrack maintains an in-memory Min-Heap for each user, stored as tuples:
 ```python
-# Each heap element is a tuple: (expiry_date, item_id, product_name, batch_no, quantity)
-# Python's heapq always pops the smallest element — i.e., the earliest expiry date.
-
-heap_element = (expiry_date, item_id, product_name, batch_no, quantity)
-heapq.heappush(user_heaps[email], heap_element)
+(expiry_date, id, product_name, batch_no, quantity, unit_price)
 ```
+- Because Python compares tuples element-by-element, the primary comparison key is `expiry_date` (`YYYY-MM-DD`).
+- When `sell_product(product, qty)` is invoked:
+  1. Retrieves available non-expired stock. If total non-expired stock $< \text{qty}$, the transaction **rolls back completely** (no partial corrupt state).
+  2. The Min-Heap pops the earliest-expiring batch in $O(\log n)$ time.
+  3. Batches are deducted atomically within a database transaction, recording the units sold, unit price, and total sale amount in the `sales` ledger.
 
-Each user (`email`) has an isolated heap. When a batch is added or sold, the user's heap is rebuilt from the database (`load_from_db`) to maintain consistency.
+### 2. Explainable 7-Day Demand Forecasting & Smart Restock
+The forecast engine ([`forecast.py`](file:///d:/inventery/forecast.py)) executes optimized, grouped SQL queries to prevent $N+1$ performance degradation:
+1. Queries distinct active products and lifetime sales.
+2. Sums total units sold during the previous 7 calendar days $[T-6, T]$.
+3. Computes:
+   $$\text{Avg Daily Demand} = \frac{\text{Units Sold in 7 Days}}{7.0}$$
+   $$\text{Forecast Next 7 Days} = \lceil \text{Avg Daily Demand} \times 7 \rceil$$
+   $$\text{Suggested Restock} = \max(0, \text{Forecast} - \text{Current Stock})$$
+   $$\text{Restock Investment (₹)} = \text{Suggested Restock} \times \text{Unit Price}$$
 
-### FEFO Sell Loop
-
-```
-sell_product(email, product_name, quantity=10)
-  └── while remaining > 0:
-        batch = get_nearest_expiry(email, product_name)   # O(k) scan
-        if batch is expired:
-            DELETE from DB → reload heap → continue
-        if batch.quantity <= remaining:
-            DELETE batch from DB → reload heap → remaining -= batch.quantity
-        else:
-            UPDATE quantity in DB → remaining = 0
-```
-
-This ensures **no expired stock is ever sold**, and deductions always begin with the oldest batch.
+### 3. Stock Quantity & Price Adjustment Engine
+Stock can be adjusted through three intuitive workflows:
+- **By Product Name** (`/adjust_product`): Automatically routes stock additions to the latest active batch, or deductions via FEFO.
+- **By Batch Stepper** (`/adjust_batch/<batch_no>`): Increments or decrements a specific batch directly.
+- **Batch Edit Modal** (`/edit_batch/<batch_no>`): Direct modification of batch attributes (Quantity, Unit Price, Expiry Date).
 
 ---
 
-## Project Structure
+## 💻 Tech Stack
 
-```
-Inventrack-Inventory-Management-System/
-│
-├── app.py                  # Flask application, route handlers
-├── auth.py                 # User authentication, OTP generation & email
-├── database_setup.py       # SQLite schema initialisation (run once on startup)
-├── heap.py                 # Per-user Min-Heap cache (in-memory, FEFO engine)
-├── inventory_management.py # Core inventory logic (add, sell, query)
-├── sms.py                  # Email/SMS alert utilities
-├── requirements.txt        # Python dependencies
-├── .gitignore
-└── templates/              # Jinja2 HTML templates
-    ├── landing_page.html
-    ├── login.html
-    ├── register.html
-    ├── verify_otp.html
-    ├── dashboard.html
-    ├── add.html
-    ├── sell.html
-    ├── error_add.html
-    └── error_sell.html
+| Component | Technology | Description |
+|---|---|---|
+| **Backend** | Python 3.12 / 3.14 | Core language |
+| **Web Framework** | Flask 3.0.2 | Lightweight WSGI web framework |
+| **Database** | SQLite 3 | Embedded ACID database with foreign keys and index optimization |
+| **DSA / Caching** | Python `heapq` | In-memory per-user Min-Heap priority queues |
+| **Frontend** | HTML5, CSS3, Vanilla JS | Bespoke dark Obsidian/Indigo UI design system |
+| **Typography** | Plus Jakarta Sans & JetBrains Mono | Premium software typography |
+| **Testing** | `pytest 9.1` | Automated test suite (13 comprehensive tests) |
+
+---
+
+## 📂 Project Directory Structure
+
+```text
+inventery/
+├── app.py                      # Flask application entry point & route controllers
+├── inventory_management.py     # Core business logic: batch CRUD, FEFO sell, stock adjustment
+├── forecast.py                 # 7-day demand moving average & restock calculation engine
+├── heap.py                     # Min-Heap priority queue implementation & heap sync
+├── database_setup.py           # Safe schema migrations & online SQLite backups
+├── auth.py                     # User registration, login, OTP verification logic
+├── sms.py                      # Email alert dispatch (with local console OTP fallback)
+├── view_db.py                  # CLI utility for inspecting database contents
+├── database.db                 # Primary local SQLite database
+├── backups/                    # Auto-generated verified database backups
+├── templates/                  # Jinja2 HTML templates
+│   ├── base.html               # Shared layout, navigation, design tokens, toast alerts
+│   ├── dashboard.html          # Main dashboard, KPI cards, forecast table, batch ledger
+│   ├── add.html                # Add Batch & Quick Product Stock Adjustment tabs
+│   ├── sell.html               # Dedicated FEFO selling interface with confirmation modal
+│   ├── login.html              # Authentication login screen
+│   ├── register.html           # User registration screen
+│   └── verify_otp.html         # OTP verification screen
+└── tests/
+    └── test_inventrack.py      # Pytest test suite (13 automated unit & integration tests)
 ```
 
 ---
 
-## Getting Started
+## 🗄️ Database Architecture & Schema
 
-### Prerequisites
+### `inventory` Table
+Stores individual physical batches:
+```sql
+CREATE TABLE IF NOT EXISTS inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    batch_no TEXT NOT NULL UNIQUE,
+    quantity INTEGER NOT NULL CHECK (quantity >= 0),
+    expiry_date TEXT NOT NULL,
+    unit_price REAL DEFAULT 0.0,
+    FOREIGN KEY(user_email) REFERENCES user(email) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_lookup 
+ON inventory(user_email, product_name, expiry_date);
+```
 
-- Python 3.8+
-- pip
+### `sales` Table
+Atomic transaction ledger tracking each sale:
+```sql
+CREATE TABLE IF NOT EXISTS sales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    sale_date TEXT NOT NULL,
+    sale_timestamp TEXT NOT NULL,
+    unit_price REAL DEFAULT 0.0,
+    total_amount REAL DEFAULT 0.0,
+    FOREIGN KEY(user_email) REFERENCES user(email) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_sales_query 
+ON sales(user_email, product_name, sale_date);
+```
 
-### Installation
+### `user` Table
+Stores user credentials and profile information:
+```sql
+CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    name TEXT NOT NULL,
+    mobile TEXT NOT NULL
+);
+```
 
+---
+
+## ⚡ Quick Start / Local Setup Guide
+
+### 1. Prerequisites
+- Python 3.10+ installed ([Download Python](https://www.python.org/downloads/))
+- VS Code or your preferred code editor
+
+### 2. Clone / Open the Project
 ```bash
-# 1. Clone the repository
 git clone https://github.com/engineermayur-07/Inventrack-Inventory-Management-System.git
 cd Inventrack-Inventory-Management-System
+```
 
-# 2. Create and activate a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate        # On Windows: venv\Scripts\activate
+### 3. Install Dependencies
+```bash
+pip install flask python-dotenv pytest
+```
 
-# 3. Install dependencies
-pip install -r requirements.txt
+### 4. Configure Environment (Optional)
+Create a `.env` file in the root folder:
+```ini
+SECRET_KEY=inventrack-super-secret-key-2026
+# Optional: SMTP email configuration for real email OTPs
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_app_password
+```
+*(Note: If SMTP credentials are not configured, OTP codes will print directly to the terminal console during registration for seamless local testing).*
 
-# 4. Set up environment variables (see section below)
-cp .env.example .env            # or create .env manually
-
-# 5. Run the application
+### 5. Launch the Application
+```bash
 python app.py
 ```
-
-The app will be available at `http://127.0.0.1:5000`.
-
-The database (`database.db`) is created automatically on first run via `init_db()` in `database_setup.py`.
-
----
-
-## Environment Variables
-
-Create a `.env` file in the project root with the following keys:
-
-```env
-SECRET_KEY=your-secret-key-here
-
-# Email configuration for OTP delivery
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-
-# Optional: SMS/alert configuration
-SMS_API_KEY=your-sms-api-key
+Open your browser and navigate to:
+```
+http://127.0.0.1:5000
 ```
 
-> **Note:** For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833) rather than your account password.
+### 6. Default Test Account
+To test immediately without registering:
+- **Email**: `demo@inventrack.com`
+- **Password**: `password123`
 
 ---
 
-## Usage
+## 🧪 Running Automated Tests
 
-### 1. Register
-Navigate to `/register`, fill in your name, email, and mobile number. An OTP will be sent to your email — enter it to complete registration.
+Inventrack includes a complete test suite covering database migrations, atomic rollbacks, Min-Heap synchronization, demand forecasting, stock adjustments, and price updates.
 
-### 2. Login
-Go to `/login` with your registered credentials. On success you are redirected to your personal dashboard.
+Run the test suite using `pytest`:
+```bash
+python -m pytest -v tests/test_inventrack.py
+```
 
-### 3. Add a Batch
-Click **Add Batch** and provide:
-- Product Name (auto-uppercased)
-- Batch Number (must be unique across all users)
-- Quantity
-- Expiry Date
-
-### 4. Sell a Product
-Click **Sell**, enter the product name and quantity. Inventrack will automatically deduct from the earliest-expiring batch first (FEFO), spanning multiple batches if needed and skipping/removing any expired ones automatically.
-
-### 5. Dashboard
-Your home dashboard shows:
-- All inventory sorted by expiry date
-- Expiring-soon alerts (🟡 within 30 days, 🔴 within 10 days)
-
----
-
-## API / Routes Reference
-
-| Method | Route | Description | Auth Required |
-|---|---|---|---|
-| GET | `/` | Dashboard (or landing page if not logged in) | No |
-| GET/POST | `/register` | New user registration | No |
-| GET/POST | `/verify-otp` | OTP verification to complete registration | No |
-| GET/POST | `/login` | User login | No |
-| GET | `/logout` | Clears session and redirects to home | Yes |
-| GET/POST | `/add_batch` | Add a new product batch | Yes |
-| GET/POST | `/sell_product` | Sell a quantity of a product (FEFO) | Yes |
-| GET | `/get_expiring_stock` | View items expiring within 30 days | Yes |
+Expected Output:
+```text
+============================= test session starts =============================
+tests/test_inventrack.py::test_database_init_and_backup PASSED           [  7%]
+tests/test_inventrack.py::test_batch_management_and_validation PASSED    [ 15%]
+tests/test_inventrack.py::test_fefo_selling_and_sales_recording PASSED   [ 23%]
+tests/test_inventrack.py::test_atomic_rollback_on_insufficient_stock PASSED [ 30%]
+tests/test_inventrack.py::test_zero_sales_calendar_days_average PASSED   [ 38%]
+tests/test_inventrack.py::test_product_wise_demand_separation PASSED     [ 46%]
+tests/test_inventrack.py::test_insufficient_sales_data_handling PASSED   [ 53%]
+tests/test_inventrack.py::test_smart_restock_recommendations PASSED      [ 61%]
+tests/test_inventrack.py::test_flask_dashboard_renders_forecast PASSED   [ 69%]
+tests/test_inventrack.py::test_batch_quantity_adjustment_and_deletion PASSED [ 76%]
+tests/test_inventrack.py::test_batch_edit_and_price_valuation PASSED     [ 84%]
+tests/test_inventrack.py::test_product_level_stock_adjustment PASSED     [ 92%]
+tests/test_inventrack.py::test_product_price_update PASSED               [100%]
+============================= 13 passed in 1.03s ==============================
+```
 
 ---
 
-## Database Schema
+## 🔌 Routes & API Endpoints
 
-### `user`
-| Column | Type | Notes |
+| HTTP Method | Route | Description |
 |---|---|---|
-| id | INTEGER | Primary key, auto-increment |
-| email | TEXT | Unique identifier |
-| password | TEXT | User's password |
-| name | TEXT | Display name |
-| mobile | TEXT | Mobile number |
-
-### `inventory`
-| Column | Type | Notes |
-|---|---|---|
-| id | INTEGER | Primary key, auto-increment |
-| user_email | TEXT | Foreign key → user.email |
-| product_name | TEXT | Stored uppercase |
-| batch_no | TEXT | Unique per batch |
-| quantity | INTEGER | Units in stock |
-| expiry_date | TEXT | Format: `YYYY-MM-DD` |
+| `GET` | `/` | Dashboard displaying KPI cards, demand forecast, and batch ledger |
+| `GET`, `POST` | `/login` | User authentication |
+| `GET`, `POST` | `/register` | User account registration (with OTP verification) |
+| `GET`, `POST` | `/add_batch` | Register a new batch or adjust existing product stock |
+| `POST` | `/adjust_product` | Quick stock adjustment (`+ Add`, `− Deduct`, `🏷️ Price Only`) by product name |
+| `POST` | `/adjust_batch/<batch_no>` | Increments (`+1`) or decrements (`−1`) a specific batch |
+| `POST` | `/edit_batch/<batch_no>` | Updates quantity, unit price (₹), and expiry date for a batch |
+| `POST` | `/delete_batch/<batch_no>` | Permanently deletes a specific batch from inventory |
+| `GET`, `POST` | `/sell_product` | Performs atomic FEFO deduction and records transaction in `sales` |
+| `GET` | `/get_expiring_stock` | Filtered view of batches expiring within 30 days |
+| `GET` | `/logout` | Clears user session |
 
 ---
 
-## Future Improvements
+## 🔒 Security & Backup Mechanism
 
-- **Password Hashing** — currently passwords are stored in plain text; integrating `bcrypt` or `werkzeug.security` would make this production-ready.
-- **Forgot Password / OTP Reset** — allow users to reset credentials via email OTP.
-- **Low Stock Alerts** — notify users when a product's total quantity falls below a configurable threshold.
-- **CSV / Excel Export** — allow users to download their inventory as a spreadsheet.
-- **Product Categories** — group products and filter dashboard by category.
-- **Docker / CI-CD** — containerise with Docker and add a CI/CD pipeline for automated deployments.
-- **REST API** — expose inventory endpoints as a JSON API for mobile or third-party integrations.
+- **Online SQLite Backup API**: Before any schema modification, an automated verified backup is taken using `sqlite3.Connection.backup()`, avoiding Windows `WinError 32` file locks.
+- **Foreign Key Constraints & Rollbacks**: SQLite is initialized with `PRAGMA foreign_keys = ON;`. Sales and stock adjustments use strict transaction blocks (`COMMIT` / `ROLLBACK`).
+- **Cache Invalidation**: Custom `@app.after_request` handler enforces `Cache-Control: no-store, no-cache, must-revalidate` headers so browser snapshots never display stale inventory data.
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Author & Acknowledgments
 
-**Mayur B Gund**
-SY B.Tech Computer Science & Engineering
+**Mayur B Gund**  
+B.Tech Computer Science & Engineering  
 
-[![GitHub](https://img.shields.io/badge/GitHub-engineermayur--07-181717?logo=github)](https://github.com/engineermayur-07)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-mgund1920-0A66C2?logo=linkedin)](https://linkedin.com/in/mgund1920)
-[![Email](https://img.shields.io/badge/Email-mgund1920%40gmail.com-D14836?logo=gmail)](mailto:mgund1920@gmail.com)
+- **GitHub**: [@engineermayur-07](https://github.com/engineermayur-07)
+- **LinkedIn**: [Mayur Gund](https://linkedin.com/in/mgund1920)
+- **Email**: [mgund1920@gmail.com](mailto:mgund1920@gmail.com)
 
 ---
 
-> *Built with Flask, SQLite, and a carefully placed Min-Heap.*
+> *Inventrack — Where Data Structures meet Real-World Supply Chain Optimization.*

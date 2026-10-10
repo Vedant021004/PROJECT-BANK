@@ -1,3 +1,7 @@
 .env
 database.db
+*.db
 __pycache__/
+.venv/
+.pytest_cache/
+backups/
