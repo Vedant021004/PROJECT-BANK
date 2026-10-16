@@ -1,4 +1,4 @@
-# 📦 Inventrack — Smart Inventory Management System
+# 📦 Inventrack — Smart Inventory Management System..
 ### Product-Wise Demand Prediction · FEFO Expiry Tracking · Valuation & Stock Controls
 
 > A production-grade, full-stack inventory management web application built with **Python (Flask 3.0)** and **SQLite 3**, featuring an algorithmic **Min-Heap FEFO (First Expired, First Out)** dispatch engine, **product-wise 7-calendar-day demand forecasting**, **live pricing & inventory valuation**, and **instant stock quantity controls**.
