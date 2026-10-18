@@ -22,6 +22,7 @@ class Movie:
     ott_platform: str
     release_year: int
     description: str
+    poster_url: str = ""
 
     @property
     def duration_category(self) -> str:

@@ -137,38 +137,60 @@ def render_movie_card(scored_movie, is_exact: bool = True, card_key_suffix: str 
     t_pill = '<span class="dim-pill-matched">✓ Time</span>' if bd.time_matched else '<span class="dim-pill-unmatched">✕ Time</span>'
     l_pill = '<span class="dim-pill-matched">✓ Language</span>' if bd.language_matched else '<span class="dim-pill-unmatched">✕ Language</span>'
 
+    # Poster thumbnail
+    poster_url = getattr(m, "poster_url", "")
+    if poster_url:
+        poster_html = f'''
+        <div class="movie-poster-container">
+            <img src="{poster_url}" alt="{m.title} Poster" class="movie-poster-img" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1rem; background:#181c33; color:#c4b5fd; font-size:0.8rem; font-weight:600;\\'><span style=\\'font-size:2.2rem; margin-bottom:0.4rem;\\'>🎬</span>{m.title}</div>';" />
+        </div>
+        '''
+    else:
+        poster_html = f'''
+        <div class="movie-poster-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1rem; background:linear-gradient(135deg, #181c33, #0f1124);">
+            <span style="font-size:2.2rem; margin-bottom:0.4rem;">🎬</span>
+            <div style="font-weight:700; font-size:0.85rem; color:#f7f4eb; line-height:1.2;">{m.title}</div>
+            <div style="font-size:0.75rem; color:#c4b5fd; margin-top:0.3rem;">{m.release_year}</div>
+        </div>
+        '''
+
     # Card Container
     card_html = f"""
     <div class="movie-card">
-        <div class="card-header-row">
-            <div>
-                <h3 class="card-title">{m.title} <span class="card-year">({m.release_year})</span></h3>
+        <div class="movie-card-flex">
+            {poster_html}
+            <div class="movie-card-content">
+                <div class="card-header-row">
+                    <div>
+                        <h3 class="card-title">{m.title} <span class="card-year">({m.release_year})</span></h3>
+                    </div>
+                    <div class="card-score-pill">
+                        🎯 {bd.final_score}% Match
+                    </div>
+                </div>
+                
+                <div class="card-badges">
+                    <span class="badge-tag badge-rating">⭐ {m.rating} / 10</span>
+                    <span class="badge-tag badge-ott">📺 {m.ott_platform}</span>
+                    <span class="badge-tag">⏱️ {m.duration} min ({m.duration_category})</span>
+                    <span class="badge-tag">🌐 {m.language}</span>
+                    <span class="badge-tag badge-mood">🎭 {m.mood}</span>
+                    <span class="badge-tag">🏷️ {m.genre}</span>
+                </div>
+
+                <p class="card-desc">{m.description}</p>
+
+                <div class="match-dimensions">
+                    {g_pill} {m_pill} {t_pill} {l_pill}
+                    <span style="font-size: 0.72rem; color: #9ba3be; margin-left: 0.5rem; align-self: center;">
+                        (Preferences: {bd.preference_score}/70 pts + Rating Bonus: {bd.rating_bonus}/30 pts)
+                    </span>
+                </div>
+
+                <div class="card-explanation">
+                    <strong>💡 Recommendation Reason:</strong> {bd.explanation}
+                </div>
             </div>
-            <div class="card-score-pill">
-                🎯 {bd.final_score}% Match
-            </div>
-        </div>
-        
-        <div class="card-badges">
-            <span class="badge-tag badge-rating">⭐ {m.rating} / 10</span>
-            <span class="badge-tag badge-ott">📺 {m.ott_platform}</span>
-            <span class="badge-tag">⏱️ {m.duration} min ({m.duration_category})</span>
-            <span class="badge-tag">🌐 {m.language}</span>
-            <span class="badge-tag badge-mood">🎭 {m.mood}</span>
-            <span class="badge-tag">🏷️ {m.genre}</span>
-        </div>
-
-        <p class="card-desc">{m.description}</p>
-
-        <div class="match-dimensions">
-            {g_pill} {m_pill} {t_pill} {l_pill}
-            <span style="font-size: 0.72rem; color: #9ba3be; margin-left: 0.5rem; align-self: center;">
-                (Preferences: {bd.preference_score}/70 pts + Rating Bonus: {bd.rating_bonus}/30 pts)
-            </span>
-        </div>
-
-        <div class="card-explanation">
-            <strong>💡 Recommendation Reason:</strong> {bd.explanation}
         </div>
     </div>
     """
@@ -456,25 +478,42 @@ with tab_watchlist:
             wl_movies = linear_search_by_title(wl_movies, wl_query)
 
         for m in wl_movies:
+            poster_url = getattr(m, "poster_url", "")
+            wl_poster_html = f'''
+            <div class="movie-poster-container" style="flex:0 0 110px; width:110px; min-height:165px;">
+                <img src="{poster_url}" alt="{m.title}" class="movie-poster-img" style="min-height:165px;" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0.5rem; background:#181c33; color:#c4b5fd; font-size:0.75rem;\\'>🎬<br/>{m.title}</div>';" />
+            </div>
+            ''' if poster_url else f'''
+            <div class="movie-poster-container" style="flex:0 0 110px; width:110px; min-height:165px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0.5rem; background:#181c33;">
+                <span style="font-size:1.8rem;">🎬</span>
+                <div style="font-size:0.75rem; color:#f7f4eb; font-weight:600; margin-top:0.3rem;">{m.title}</div>
+            </div>
+            '''
+
             render_html(
                 f"""
                 <div class="movie-card">
-                    <div class="card-header-row">
-                        <div>
-                            <h3 class="card-title">{m.title} <span class="card-year">({m.release_year})</span></h3>
-                        </div>
-                        <div class="card-score-pill">
-                            ⭐ {m.rating} / 10
+                    <div class="movie-card-flex">
+                        {wl_poster_html}
+                        <div class="movie-card-content">
+                            <div class="card-header-row">
+                                <div>
+                                    <h3 class="card-title">{m.title} <span class="card-year">({m.release_year})</span></h3>
+                                </div>
+                                <div class="card-score-pill">
+                                    ⭐ {m.rating} / 10
+                                </div>
+                            </div>
+                            <div class="card-badges">
+                                <span class="badge-tag badge-ott">📺 {m.ott_platform}</span>
+                                <span class="badge-tag">⏱️ {m.duration} min</span>
+                                <span class="badge-tag">🌐 {m.language}</span>
+                                <span class="badge-tag badge-mood">🎭 {m.mood}</span>
+                                <span class="badge-tag">🏷️ {m.genre}</span>
+                            </div>
+                            <p class="card-desc">{m.description}</p>
                         </div>
                     </div>
-                    <div class="card-badges">
-                        <span class="badge-tag badge-ott">📺 {m.ott_platform}</span>
-                        <span class="badge-tag">⏱️ {m.duration} min</span>
-                        <span class="badge-tag">🌐 {m.language}</span>
-                        <span class="badge-tag badge-mood">🎭 {m.mood}</span>
-                        <span class="badge-tag">🏷️ {m.genre}</span>
-                    </div>
-                    <p class="card-desc">{m.description}</p>
                 </div>
                 """
             )

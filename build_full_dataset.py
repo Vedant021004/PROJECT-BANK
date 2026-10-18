@@ -210,6 +210,187 @@ MOVIES = [
     (180, "Incendies", "Drama, Mystery", "French", "Thoughtful, Emotional", 131, 8.3, "Prime Video", 2010, "Twins travel to the Middle East to fulfill their deceased mother's final wishes, uncovering a harrowing family secret.")
 ]
 
+IMDB_MAP = {
+    "Drishyam": "tt4430212",
+    "Drishyam 2": "tt15501640",
+    "3 Idiots": "tt1187043",
+    "Dangal": "tt5074352",
+    "Andhadhun": "tt8108198",
+    "Zindagi Na Milegi Dobara": "tt1562872",
+    "Taare Zameen Par": "tt0986264",
+    "Tumbbad": "tt8239946",
+    "Kahaani": "tt1820649",
+    "Gangs of Wasseypur": "tt1954470",
+    "Stree": "tt8108202",
+    "Queen": "tt3322420",
+    "Chupke Chupke": "tt0072783",
+    "Hera Pheri": "tt0242519",
+    "Phir Hera Pheri": "tt0419058",
+    "Swades": "tt0367110",
+    "Sholay": "tt0073707",
+    "Lagaan": "tt0169102",
+    "Dil Chahta Hai": "tt0292490",
+    "A Wednesday": "tt1280558",
+    "Talvar": "tt4934950",
+    "Special 26": "tt2377938",
+    "Barfi!": "tt2082197",
+    "Jab We Met": "tt1093370",
+    "Chak De! India": "tt0871510",
+    "12th Fail": "tt23849516",
+    "Udaan": "tt1639426",
+    "Article 15": "tt10324144",
+    "Sardar Udham": "tt10235318",
+    "Shershaah": "tt10295212",
+    "Masaan": "tt4635372",
+    "The Lunchbox": "tt2350496",
+    "Munna Bhai M.B.B.S.": "tt0374887",
+    "Lage Raho Munna Bhai": "tt0468949",
+    "Welcome": "tt0488798",
+    "Dhamaal": "tt1078580",
+    "Golmaal: Fun Unlimited": "tt0845448",
+    "Andaz Apna Apna": "tt0109117",
+    "Piku": "tt4302938",
+    "Badlapur": "tt3631112",
+    "Raazi": "tt7098658",
+    "Baby": "tt3848892",
+    "Talaash": "tt1785572",
+    "Badla": "tt8130968",
+    "NH10": "tt3505616",
+    "Johnny Gaddaar": "tt1093369",
+    "Tamasha": "tt3148502",
+    "Rockstar": "tt1839596",
+    "Wake Up Sid": "tt1324059",
+    "Jaane Tu... Ya Jaane Na": "tt1255554",
+    "Ghajini": "tt1176095",
+    "Don": "tt0461936",
+    "Yeh Jawaani Hai Deewani": "tt2175988",
+    "Dilwale Dulhania Le Jayenge": "tt0112870",
+    "Kal Ho Naa Ho": "tt0347304",
+    "Bhaag Milkha Bhaag": "tt2356180",
+    "Manjummel Boys": "tt26458038",
+    "Kumbalangi Nights": "tt8413338",
+    "Premam": "tt4759446",
+    "Bangalore Days": "tt3582488",
+    "Aavesham": "tt27055964",
+    "Bramayugam": "tt27546654",
+    "Premalu": "tt29618179",
+    "Neru": "tt28383286",
+    "Iratta": "tt23835688",
+    "Lucifer": "tt8724498",
+    "Minnal Murali": "tt10626370",
+    "Vikram": "tt9179430",
+    "Kaithi": "tt9900782",
+    "Jai Bhim": "tt15097216",
+    "Soorarai Pottru": "tt10189514",
+    "96": "tt7019842",
+    "Ratsasan": "tt7060344",
+    "Vikram Vedha": "tt6148156",
+    "Asuran": "tt9477520",
+    "Jailer": "tt17663992",
+    "Thani Oruvan": "tt3838276",
+    "RRR": "tt8178634",
+    "Baahubali 2: The Conclusion": "tt4849438",
+    "Jersey": "tt8962946",
+    "Sita Ramam": "tt20850406",
+    "C/o Kancharapalem": "tt8730950",
+    "Pushpa: The Rise": "tt9389998",
+    "Eega": "tt2258337",
+    "Kantara": "tt21136450",
+    "K.G.F: Chapter 1": "tt7736562",
+    "777 Charlie": "tt8904576",
+    "Lucia": "tt2358592",
+    "The Shawshank Redemption": "tt0111161",
+    "The Dark Knight": "tt0468569",
+    "Inception": "tt1375666",
+    "Interstellar": "tt0816692",
+    "Oppenheimer": "tt15398776",
+    "Pulp Fiction": "tt0110912",
+    "Fight Club": "tt0137523",
+    "Forrest Gump": "tt0109830",
+    "The Matrix": "tt0133093",
+    "Gladiator": "tt0172495",
+    "Whiplash": "tt2582802",
+    "Spider-Man: Into the Spider-Verse": "tt4633694",
+    "Spider-Man: Across the Spider-Verse": "tt9362722",
+    "The Prestige": "tt0482571",
+    "The Grand Budapest Hotel": "tt2278388",
+    "Knives Out": "tt8946378",
+    "Glass Onion": "tt11564570",
+    "La La Land": "tt3783958",
+    "Arrival": "tt2543164",
+    "Shutter Island": "tt1130884",
+    "Gone Girl": "tt2267998",
+    "Se7en": "tt0114369",
+    "The Silence of the Lambs": "tt0102926",
+    "A Quiet Place": "tt6644200",
+    "Get Out": "tt5052448",
+    "Mad Max: Fury Road": "tt1392190",
+    "John Wick": "tt2911666",
+    "Top Gun: Maverick": "tt1745960",
+    "Everything Everywhere All at Once": "tt6710474",
+    "Coco": "tt2380307",
+    "Up": "tt1049413",
+    "WALL-E": "tt0910970",
+    "Soul": "tt2948372",
+    "Inside Out": "tt2096673",
+    "Paddington 2": "tt4468740",
+    "Fantastic Mr. Fox": "tt0432283",
+    "Little Miss Sunshine": "tt0449059",
+    "Superbad": "tt0829482",
+    "Modern Times": "tt0027977",
+    "Before Sunrise": "tt0112471",
+    "Before Sunset": "tt0381681",
+    "About Time": "tt2194499",
+    "Eternal Sunshine of the Spotless Mind": "tt0338013",
+    "Her": "tt1798709",
+    "The Truman Show": "tt0120382",
+    "Midnight in Paris": "tt1605783",
+    "Dune: Part Two": "tt15239678",
+    "Good Will Hunting": "tt0119217",
+    "Dead Poets Society": "tt0097165",
+    "Prisoners": "tt1392214",
+    "Zodiac": "tt0443706",
+    "Nightcrawler": "tt2872718",
+    "1917": "tt8579674",
+    "The Lion King": "tt0110357",
+    "Ratatouille": "tt0382932",
+    "Finding Nemo": "tt0266543",
+    "Parasite": "tt6751668",
+    "Memories of Murder": "tt0353969",
+    "Train to Busan": "tt5700672",
+    "Oldboy": "tt0364569",
+    "The Handmaiden": "tt4016934",
+    "Decision to Leave": "tt12477780",
+    "Past Lives": "tt13238346",
+    "A Taxi Driver": "tt6878038",
+    "Miracle in Cell No. 7": "tt2817838",
+    "I Saw the Devil": "tt1588170",
+    "Spirited Away": "tt0245429",
+    "Your Name": "tt5311514",
+    "My Neighbor Totoro": "tt0096283",
+    "Princess Mononoke": "tt0119698",
+    "A Silent Voice": "tt5323662",
+    "Grave of the Fireflies": "tt0095327",
+    "Seven Samurai": "tt0047478",
+    "Godzilla Minus One": "tt23289160",
+    "Ponyo": "tt0876563",
+    "Suzume": "tt16428256",
+    "Pan's Labyrinth": "tt0457430",
+    "The Secret in Their Eyes": "tt1305806",
+    "The Invisible Guest": "tt4857264",
+    "Wild Tales": "tt3011894",
+    "Roma": "tt6155172",
+    "The Platform": "tt8228288",
+    "All About My Mother": "tt0185125",
+    "Amélie": "tt0211915",
+    "The Intouchables": "tt1675434",
+    "Portrait of a Lady on Fire": "tt8613070",
+    "La Haine": "tt0113247",
+    "Anatomy of a Fall": "tt17009710",
+    "The Artist": "tt1655442",
+    "Incendies": "tt1255953"
+}
+
 def main():
     out_dir = os.path.join(os.path.dirname(__file__), "data")
     os.makedirs(out_dir, exist_ok=True)
@@ -217,16 +398,35 @@ def main():
     
     headers = [
         "movie_id", "title", "genre", "language", "mood", 
-        "duration", "rating", "ott_platform", "release_year", "description"
+        "duration", "rating", "ott_platform", "release_year", "description", "poster_url"
     ]
     
     with open(csv_file, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(headers)
         for row in MOVIES:
-            writer.writerow(row)
+            title = row[1]
+            imdb_id = IMDB_MAP.get(title, "")
+            poster_url = f"https://images.metahub.space/poster/medium/{imdb_id}/img" if imdb_id else ""
+            full_row = list(row) + [poster_url]
+            writer.writerow(full_row)
             
-    print(f"Successfully generated {csv_file} with {len(MOVIES)} properly quoted movie rows across 10 languages.")
+    # Also write to CineMatch/data/movies.csv
+    cm_dir = os.path.join(os.path.dirname(__file__), "CineMatch", "data")
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "CineMatch")):
+        os.makedirs(cm_dir, exist_ok=True)
+        cm_csv = os.path.join(cm_dir, "movies.csv")
+        with open(cm_csv, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(headers)
+            for row in MOVIES:
+                title = row[1]
+                imdb_id = IMDB_MAP.get(title, "")
+                poster_url = f"https://images.metahub.space/poster/medium/{imdb_id}/img" if imdb_id else ""
+                full_row = list(row) + [poster_url]
+                writer.writerow(full_row)
+
+    print(f"Successfully generated {csv_file} with {len(MOVIES)} properly quoted movie rows and poster URLs.")
 
 if __name__ == "__main__":
     main()

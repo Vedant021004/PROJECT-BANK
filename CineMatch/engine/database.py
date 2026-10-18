@@ -63,6 +63,7 @@ class MovieDatabase:
                 ott_platform=str(row["ott_platform"]),
                 release_year=int(row["release_year"]),
                 description=str(row["description"]),
+                poster_url=str(row["poster_url"]).strip() if "poster_url" in row and pd.notna(row["poster_url"]) else "",
             )
             self._movies.append(movie)
             self._movie_dict[movie.movie_id] = movie
