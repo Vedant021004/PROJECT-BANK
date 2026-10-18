@@ -1,4 +1,15 @@
-# 📦 Inventrack — Smart Inventory Management System..
+# 📂 PROJECT-BANK
+
+Welcome to **PROJECT-BANK**! This repository hosts complete, production-grade academic software engineering projects:
+
+| Project | Description | Tech Stack | Quick Launch |
+| :--- | :--- | :--- | :--- |
+| 🎬 **[CineMatch — Smart Movie & OTT Finder](./CineMatch)** | Explainable movie recommendation platform with interactive Slideshow, DAA algorithms (QuickSort, MergeSort, Binary Search), and 180+ titles across 10 languages. | Python, Streamlit, Pandas, NumPy, Matplotlib | Double-click `run_cinematch.bat` or `cd CineMatch && streamlit run app.py` |
+| 📦 **[Inventrack — Smart Inventory Management](#-inventrack--smart-inventory-management-system)** | Production-grade inventory management with Min-Heap FEFO dispatch, 7-day demand forecasting, and stock valuation. | Python (Flask 3.0), SQLite 3 | `python database_setup.py && python app.py` |
+
+---
+
+# 📦 Inventrack — Smart Inventory Management System
 ### Product-Wise Demand Prediction · FEFO Expiry Tracking · Valuation & Stock Controls
 
 > A production-grade, full-stack inventory management web application built with **Python (Flask 3.0)** and **SQLite 3**, featuring an algorithmic **Min-Heap FEFO (First Expired, First Out)** dispatch engine, **product-wise 7-calendar-day demand forecasting**, **live pricing & inventory valuation**, and **instant stock quantity controls**.
