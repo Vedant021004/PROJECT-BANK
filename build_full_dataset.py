@@ -7,6 +7,7 @@ Spanish, and French with multi-tag genres, authentic ratings, and OTT platforms.
 
 import csv
 import os
+import json
 
 MOVIES = [
     # ==================== HINDI (BOLLYWOOD) ====================
@@ -401,13 +402,21 @@ def main():
         "duration", "rating", "ott_platform", "release_year", "description", "poster_url"
     ]
     
+    amazon_cache = {}
+    cache_path = os.path.join(out_dir, "amazon_posters_cache.json")
+    if os.path.exists(cache_path):
+        with open(cache_path, "r", encoding="utf-8") as cf:
+            amazon_cache = json.load(cf)
+
     with open(csv_file, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(headers)
         for row in MOVIES:
             title = row[1]
             imdb_id = IMDB_MAP.get(title, "")
-            poster_url = f"https://images.metahub.space/poster/medium/{imdb_id}/img" if imdb_id else ""
+            poster_url = amazon_cache.get(title, "")
+            if not poster_url and imdb_id:
+                poster_url = f"https://images.metahub.space/poster/medium/{imdb_id}/img"
             full_row = list(row) + [poster_url]
             writer.writerow(full_row)
             
@@ -422,7 +431,9 @@ def main():
             for row in MOVIES:
                 title = row[1]
                 imdb_id = IMDB_MAP.get(title, "")
-                poster_url = f"https://images.metahub.space/poster/medium/{imdb_id}/img" if imdb_id else ""
+                poster_url = amazon_cache.get(title, "")
+                if not poster_url and imdb_id:
+                    poster_url = f"https://images.metahub.space/poster/medium/{imdb_id}/img"
                 full_row = list(row) + [poster_url]
                 writer.writerow(full_row)
 

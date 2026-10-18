@@ -137,29 +137,36 @@ def render_movie_card(scored_movie, is_exact: bool = True, card_key_suffix: str 
     t_pill = '<span class="dim-pill-matched">✓ Time</span>' if bd.time_matched else '<span class="dim-pill-unmatched">✕ Time</span>'
     l_pill = '<span class="dim-pill-matched">✓ Language</span>' if bd.language_matched else '<span class="dim-pill-unmatched">✕ Language</span>'
 
-    # Poster thumbnail
     poster_url = getattr(m, "poster_url", "")
-    if poster_url:
-        poster_html = f'''
-        <div class="movie-poster-container">
-            <img src="{poster_url}" alt="{m.title} Poster" class="movie-poster-img" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1rem; background:#181c33; color:#c4b5fd; font-size:0.8rem; font-weight:600;\\'><span style=\\'font-size:2.2rem; margin-bottom:0.4rem;\\'>🎬</span>{m.title}</div>';" />
-        </div>
-        '''
-    else:
-        poster_html = f'''
-        <div class="movie-poster-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1rem; background:linear-gradient(135deg, #181c33, #0f1124);">
-            <span style="font-size:2.2rem; margin-bottom:0.4rem;">🎬</span>
-            <div style="font-weight:700; font-size:0.85rem; color:#f7f4eb; line-height:1.2;">{m.title}</div>
-            <div style="font-size:0.75rem; color:#c4b5fd; margin-top:0.3rem;">{m.release_year}</div>
-        </div>
-        '''
 
-    # Card Container
-    card_html = f"""
-    <div class="movie-card">
-        <div class="movie-card-flex">
-            {poster_html}
-            <div class="movie-card-content">
+    # Outer container with responsive columns for poster and content
+    with st.container():
+        col_img, col_info = st.columns([1.2, 3.8], gap="medium")
+        
+        with col_img:
+            if poster_url:
+                try:
+                    st.image(poster_url, use_container_width=True, caption=f"⭐ {m.rating} / 10")
+                except Exception:
+                    st.markdown(f"""
+                    <div class="movie-poster-fallback">
+                        <span style="font-size: 2.5rem;">🎬</span>
+                        <div style="font-weight: 700; font-size: 0.85rem; color: #f7f4eb; margin-top: 0.4rem;">{m.title}</div>
+                        <div style="font-size: 0.75rem; color: #c4b5fd;">({m.release_year})</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="movie-poster-fallback">
+                    <span style="font-size: 2.5rem;">🎬</span>
+                    <div style="font-weight: 700; font-size: 0.85rem; color: #f7f4eb; margin-top: 0.4rem;">{m.title}</div>
+                    <div style="font-size: 0.75rem; color: #c4b5fd;">({m.release_year})</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with col_info:
+            card_html = f"""
+            <div class="movie-card-inner">
                 <div class="card-header-row">
                     <div>
                         <h3 class="card-title">{m.title} <span class="card-year">({m.release_year})</span></h3>
@@ -170,7 +177,6 @@ def render_movie_card(scored_movie, is_exact: bool = True, card_key_suffix: str 
                 </div>
                 
                 <div class="card-badges">
-                    <span class="badge-tag badge-rating">⭐ {m.rating} / 10</span>
                     <span class="badge-tag badge-ott">📺 {m.ott_platform}</span>
                     <span class="badge-tag">⏱️ {m.duration} min ({m.duration_category})</span>
                     <span class="badge-tag">🌐 {m.language}</span>
@@ -191,21 +197,18 @@ def render_movie_card(scored_movie, is_exact: bool = True, card_key_suffix: str 
                     <strong>💡 Recommendation Reason:</strong> {bd.explanation}
                 </div>
             </div>
-        </div>
-    </div>
-    """
-    render_html(card_html)
+            """
+            render_html(card_html)
 
-    # Watchlist action button
-    col_w_btn, _ = st.columns([2.5, 4.5])
-    with col_w_btn:
-        btn_label = "✓ Remove from Watchlist" if is_in_watchlist else "+ Save to Watchlist"
-        if st.button(btn_label, key=f"wl_{m.movie_id}_{card_key_suffix}", use_container_width=True):
-            if is_in_watchlist:
-                st.session_state.watchlist.remove(m.movie_id)
-            else:
-                st.session_state.watchlist.add(m.movie_id)
-            st.rerun()
+            btn_label = "✓ Remove from Watchlist" if is_in_watchlist else "+ Save to Watchlist"
+            if st.button(btn_label, key=f"wl_{m.movie_id}_{card_key_suffix}"):
+                if is_in_watchlist:
+                    st.session_state.watchlist.remove(m.movie_id)
+                else:
+                    st.session_state.watchlist.add(m.movie_id)
+                st.rerun()
+
+        st.markdown("<hr style='border: 0; height: 1px; background: rgba(139, 92, 246, 0.2); margin: 1.25rem 0 1.75rem 0;' />", unsafe_allow_html=True)
 
 
 # ==========================================
@@ -479,23 +482,20 @@ with tab_watchlist:
 
         for m in wl_movies:
             poster_url = getattr(m, "poster_url", "")
-            wl_poster_html = f'''
-            <div class="movie-poster-container" style="flex:0 0 110px; width:110px; min-height:165px;">
-                <img src="{poster_url}" alt="{m.title}" class="movie-poster-img" style="min-height:165px;" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0.5rem; background:#181c33; color:#c4b5fd; font-size:0.75rem;\\'>🎬<br/>{m.title}</div>';" />
-            </div>
-            ''' if poster_url else f'''
-            <div class="movie-poster-container" style="flex:0 0 110px; width:110px; min-height:165px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0.5rem; background:#181c33;">
-                <span style="font-size:1.8rem;">🎬</span>
-                <div style="font-size:0.75rem; color:#f7f4eb; font-weight:600; margin-top:0.3rem;">{m.title}</div>
-            </div>
-            '''
-
-            render_html(
-                f"""
-                <div class="movie-card">
-                    <div class="movie-card-flex">
-                        {wl_poster_html}
-                        <div class="movie-card-content">
+            with st.container():
+                col_w_img, col_w_info = st.columns([1.0, 4.0], gap="medium")
+                with col_w_img:
+                    if poster_url:
+                        try:
+                            st.image(poster_url, use_container_width=True, caption=f"⭐ {m.rating} / 10")
+                        except Exception:
+                            st.write("🎬")
+                    else:
+                        st.write("🎬")
+                with col_w_info:
+                    render_html(
+                        f"""
+                        <div class="movie-card-inner">
                             <div class="card-header-row">
                                 <div>
                                     <h3 class="card-title">{m.title} <span class="card-year">({m.release_year})</span></h3>
@@ -513,13 +513,12 @@ with tab_watchlist:
                             </div>
                             <p class="card-desc">{m.description}</p>
                         </div>
-                    </div>
-                </div>
-                """
-            )
-            if st.button("🗑️ Remove", key=f"wl_del_{m.movie_id}"):
-                st.session_state.watchlist.remove(m.movie_id)
-                st.rerun()
+                        """
+                    )
+                    if st.button("🗑️ Remove from Watchlist", key=f"wl_del_{m.movie_id}"):
+                        st.session_state.watchlist.remove(m.movie_id)
+                        st.rerun()
+                st.markdown("<hr style='border: 0; height: 1px; background: rgba(139, 92, 246, 0.2); margin: 1rem 0;' />", unsafe_allow_html=True)
 
 
 # ==========================================
