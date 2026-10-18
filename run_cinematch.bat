@@ -1,9 +1,8 @@
 @echo off
 title CineMatch - Smart Movie and OTT Finder
 echo =========================================================
-echo   Starting CineMatch from PROJECT-BANK
+echo   Starting CineMatch: Smart Movie and OTT Finder
 echo =========================================================
-cd CineMatch
 echo Checking and installing dependencies...
 python -m pip install -r requirements.txt
 echo.
