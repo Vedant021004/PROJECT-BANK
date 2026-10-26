@@ -131,6 +131,94 @@ class TestCineMatchCore(unittest.TestCase):
         fig = self.judge.generate_scorecard_chart(evaluation)
         self.assertIsNotNone(fig)
 
+    def test_sql_database_schema_and_crud(self):
+        """Test SQLite RDBMS schema, constraints, B-Tree indexes, and full CRUD operations."""
+        sql_db = self.db.sql_db
+        self.assertIsNotNone(sql_db)
+
+        # 1. Schema and table verification
+        schema = sql_db.get_schema_info()
+        self.assertIn("movies", schema)
+        self.assertIn("ott_platforms", schema)
+        self.assertIn("dbms_audit_log", schema)
+
+        col_names = [c["name"] for c in schema["movies"]["columns"]]
+        self.assertIn("movie_id", col_names)
+        self.assertIn("rating", col_names)
+        self.assertIn("ott_platform", col_names)
+
+        # 2. Count verification
+        count = sql_db.get_movie_count()
+        self.assertGreaterEqual(count, 50)
+
+        # 3. [C]REATE (INSERT)
+        test_id, insert_sql = sql_db.create_movie(
+            title="Unit Test SQLite Movie",
+            genre="Sci-Fi",
+            language="English",
+            mood="Excited",
+            duration=115,
+            rating=8.9,
+            ott_platform="Netflix",
+            release_year=2025,
+            description="Created during automated unit testing of DBMS CRUD.",
+            poster_url="https://example.com/poster.jpg"
+        )
+        self.assertIsNotNone(test_id)
+        self.assertIn("INSERT INTO movies", insert_sql)
+
+        # 4. [R]EAD (SELECT)
+        movie_row = sql_db.read_movie(test_id)
+        self.assertIsNotNone(movie_row)
+        self.assertEqual(movie_row["title"], "Unit Test SQLite Movie")
+        self.assertEqual(movie_row["rating"], 8.9)
+
+        # 5. [U]PDATE (UPDATE)
+        updated, update_sql = sql_db.update_movie(
+            movie_id=test_id,
+            title="Unit Test SQLite Movie (Updated)",
+            genre="Sci-Fi",
+            language="English",
+            mood="Excited",
+            duration=120,
+            rating=9.2,
+            ott_platform="Prime Video",
+            release_year=2025,
+            description="Updated during automated unit testing.",
+            poster_url="https://example.com/poster.jpg"
+        )
+        self.assertTrue(updated)
+        self.assertIn("UPDATE movies", update_sql)
+
+        movie_after_update = sql_db.read_movie(test_id)
+        self.assertEqual(movie_after_update["rating"], 9.2)
+        self.assertEqual(movie_after_update["ott_platform"], "Prime Video")
+
+        # 6. [D]ELETE (DELETE)
+        deleted, delete_sql = sql_db.delete_movie(test_id)
+        self.assertTrue(deleted)
+        self.assertIn("DELETE FROM movies", delete_sql)
+
+        movie_after_delete = sql_db.read_movie(test_id)
+        self.assertIsNone(movie_after_delete)
+
+        # 7. Audit Log verification
+        logs = sql_db.get_audit_logs(limit=10)
+        self.assertFalse(logs.empty)
+        operations = logs["operation"].tolist()
+        self.assertIn("CREATE", operations)
+        self.assertIn("UPDATE", operations)
+        self.assertIn("DELETE", operations)
+
+        # 8. Custom SQL Console execution
+        df, duration_ms, err = sql_db.execute_custom_query(
+            "SELECT ott_platform, COUNT(*) as count FROM movies GROUP BY ott_platform HAVING count > 1 ORDER BY count DESC;"
+        )
+        self.assertIsNone(err)
+        self.assertFalse(df.empty)
+        self.assertGreater(duration_ms, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -1,6 +1,8 @@
 .env
 database.db
 *.db
+!data/movies.db
+!CineMatch/data/movies.db
 __pycache__/
 .venv/
 .pytest_cache/

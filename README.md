@@ -24,7 +24,8 @@ The system processes these parameters through an explainable multi-dimensional m
 ## 2. Technology Stack
 
 - **Core Language:** Python 3.10+ (Object-Oriented Architecture)
-- **Data Manipulation & Indexing:** Pandas, Hash Maps ($\mathcal{O}(1)$ lookups)
+- **Database Engine (RDBMS):** SQLite 3.x (Serverless, ACID-Compliant, B-Tree Indexed)
+- **Data Manipulation & Indexing:** SQLite SQL queries, Pandas, Hash Maps ($\mathcal{O}(1)$ lookups)
 - **Numerical Operations:** NumPy (Vectorized weight matrix computation)
 - **DAA Implementations:** QuickSort (Lomuto), MergeSort (Stable), Binary Search, Linear Search
 - **Visual Analytics:** Matplotlib (Judge evaluation scorecard charts)
@@ -36,23 +37,26 @@ The system processes these parameters through an explainable multi-dimensional m
 
 ```
 d:/inventery/
-├── app.py                      # Main Streamlit application with cinematic UI
+├── app.py                      # Main Streamlit application with cinematic UI & DBMS Studio
+├── seed_sql_database.py        # CLI Utility to initialize and seed SQLite DB from CSV
 ├── requirements.txt            # Project dependencies
 ├── README.md                   # Complete documentation & college viva guide
 ├── generate_movies_csv.py      # Utility script for formatted dataset generation
 ├── data/
-│   └── movies.csv              # Local curated dataset (52 movies, 10 columns)
+│   ├── movies.csv              # Curated movie dataset (180+ titles)
+│   └── movies.db               # SQLite Relational Database file (movies, ott_platforms, audit_log)
 ├── engine/
 │   ├── __init__.py             # Engine package exports
-│   ├── models.py               # OOP Data models (Movie, RecommendationCriteria, MatchBreakdown, ScoredMovie)
+│   ├── models.py               # OOP Data models (Movie, RecommendationCriteria, MatchBreakdown)
 │   ├── database.py             # MovieDatabase loader, schema validation, and indexing
+│   ├── sql_database.py         # SQLite RDBMS manager, DDL schema, B-Tree indexes & CRUD engine
 │   ├── daa_algorithms.py       # DAA algorithms: QuickSort, MergeSort, BinarySearch, LinearSearch
 │   ├── recommender.py          # Multi-criteria scoring, ranking formula, and filter relaxation
 │   └── evaluator.py            # Strict EvaluatorJudge system (10 criteria scorecard + chart)
 ├── static/
 │   └── styles.css              # Midnight navy & electric violet cinematic CSS styling
 └── tests/
-    └── test_cinematch.py       # Comprehensive automated test suite
+    └── test_cinematch.py       # Comprehensive automated test suite (DAA + SQL DBMS)
 ```
 
 ---

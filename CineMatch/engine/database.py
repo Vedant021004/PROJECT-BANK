@@ -4,23 +4,27 @@ MovieDatabase handling CSV loading, data integrity verification, indexing, and s
 """
 
 import os
-from typing import List, Dict, Optional, Set, Any
+from typing import List, Dict, Optional, Set, Any, Tuple
 import pandas as pd
 from engine.models import Movie
+from engine.sql_database import SQLMovieDatabase
 
 
 class MovieDatabase:
     """
     Manages loading, validating, and querying the movie dataset.
-    Combines Pandas DataFrame operations with indexed OOP Movie entities.
+    Bridges SQLite Relational Database Management System (RDBMS) with
+    Pandas DataFrame operations and indexed OOP Movie entities.
     """
     REQUIRED_COLUMNS = [
         "movie_id", "title", "genre", "language", "mood", 
         "duration", "rating", "ott_platform", "release_year", "description"
     ]
 
-    def __init__(self, csv_path: str):
-        self.csv_path = csv_path
+    def __init__(self, csv_path: Optional[str] = None, db_path: Optional[str] = None):
+        self.csv_path = csv_path or SQLMovieDatabase.DEFAULT_CSV_PATH
+        self.db_path = db_path or SQLMovieDatabase.DEFAULT_DB_PATH
+        self.sql_db = SQLMovieDatabase(db_path=self.db_path, csv_path=self.csv_path)
         self._movies: List[Movie] = []
         self._movie_dict: Dict[int, Movie] = {}
         self._df: pd.DataFrame = pd.DataFrame()
@@ -121,3 +125,27 @@ class MovieDatabase:
             "min_duration": int(self._df["duration"].min()),
             "max_duration": int(self._df["duration"].max()),
         }
+
+    def reload(self) -> None:
+        """Reloads dataset into memory after SQL modifications."""
+        self.load_data()
+
+    def create_movie(self, **kwargs) -> Tuple[int, str]:
+        """Creates movie in SQLite database and syncs in-memory data."""
+        new_id, sql = self.sql_db.create_movie(**kwargs)
+        self.reload()
+        return new_id, sql
+
+    def update_movie(self, movie_id: int, **kwargs) -> Tuple[bool, str]:
+        """Updates movie in SQLite database and syncs in-memory data."""
+        success, sql = self.sql_db.update_movie(movie_id, **kwargs)
+        if success:
+            self.reload()
+        return success, sql
+
+    def delete_movie(self, movie_id: int) -> Tuple[bool, str]:
+        """Deletes movie in SQLite database and syncs in-memory data."""
+        success, sql = self.sql_db.delete_movie(movie_id)
+        if success:
+            self.reload()
+        return success, sql
